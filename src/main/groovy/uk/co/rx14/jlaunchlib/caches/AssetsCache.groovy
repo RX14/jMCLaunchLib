@@ -18,7 +18,7 @@ class AssetsCache {
 
 		others.each { Path path ->
 			objectsCache.copyFromTrusted(path.resolve("objects"))
-			indexesCache.copyFrom()
+//			indexesCache.copyFrom()
 		}
 
 		new AssetsCache(

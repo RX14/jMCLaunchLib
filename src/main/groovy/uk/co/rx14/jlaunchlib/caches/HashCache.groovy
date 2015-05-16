@@ -84,6 +84,7 @@ class HashCache {
 	 * @param URL
 	 * @return
 	 */
+	@CompileStatic(TypeCheckingMode.SKIP)
 	DataHashPair download(URL URL) {
 		new DataHashPair(*_download(URL))
 	}
@@ -122,7 +123,7 @@ class HashCache {
 	void copyFrom(Path otherCache) {
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
-		     .forEach { path ->
+		     .forEach { Path path ->
 		         store(path.text)
 		     }
 	}
@@ -136,7 +137,7 @@ class HashCache {
 	void copyFromTrusted(Path otherCache) {
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
-		     .forEach { path ->
+		     .forEach { Path path ->
 		         Files.copy(path, getPath(path.toFile().name), StandardCopyOption.REPLACE_EXISTING)
 		     }
 	}
