@@ -1,0 +1,24 @@
+language: java
+jdk: oraclejdk8
+sudo: false
+
+before_install: chmod +x gradlew
+install:
+  - ""
+script:
+  - ./gradlew --continue check jacocoTestReport
+  - bash <(curl -s https://codecov.io/bash)
+  - rm ~/.gradle/caches/modules-2/modules-2.lock
+
+cache:
+  directories:
+  - ~/.gradle
+
+notifications:
+#  irc:
+#    channels:
+#      - "irc.esper.net#NovaAPI"
+#    on_success: change
+#    on_failure: always
+#    skip_join: true
+  email: false

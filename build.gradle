@@ -1,6 +1,7 @@
 plugins {
 	id "groovy"
 	id "maven-publish"
+	id "jacoco"
 }
 
 repositories {
@@ -19,5 +20,12 @@ publishing {
 		main(MavenPublication) {
 			from components.java
 		}
+	}
+}
+
+jacocoTestReport {
+	reports {
+		xml.enabled = true
+		html.enabled = true
 	}
 }
