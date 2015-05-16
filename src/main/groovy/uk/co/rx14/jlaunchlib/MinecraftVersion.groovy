@@ -1,9 +1,12 @@
 package uk.co.rx14.jlaunchlib
 
-class MinecraftVersion {
-	private final String minecraftVersion;
+import groovy.transform.Immutable
+import uk.co.rx14.jlaunchlib.caches.EtagCache
 
-	MinecraftVersion(String minecraftVersion) {
-		this.minecraftVersion = minecraftVersion
-	}
+@Immutable
+class MinecraftVersion {
+	String minecraftVersion
+	EtagCache versionCache
+
+//	void
 }
