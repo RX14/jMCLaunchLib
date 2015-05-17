@@ -1,33 +1,85 @@
 package uk.co.rx14.jlaunchlib.caches
 
+import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
-import uk.co.rx14.jlaunchlib.Util.Minecraft
+import groovy.transform.TypeCheckingMode
+import uk.co.rx14.jlaunchlib.Constants
+import uk.co.rx14.jlaunchlib.MinecraftVersion
 
 import java.nio.file.Path
 
 @CompileStatic
-@Immutable
-class AssetsCache {
+@Immutable(knownImmutableClasses = [Path.class])
+class AssetsCache extends Cache {
+	Path storage
 	HashCache objects
 	EtagCache indexes
 
-	static AssetsCache create(Path directory, Path... others) {
-		def objectsCache = new HashCache(directory.resolve("objects"))
-		def indexesCache = new EtagCache(directory.resolve("indexes"))
+	/**
+	 * Creates an AssetsCache from a single path with a default structure.
+	 *
+	 * Takes a list of other caches to copy into this cache.
+	 *
+	 * @param storage where to construct the cache.
+	 * @param others other assets caches such as {@code ~/.minecraft}.
+	 * @return
+	 */
+	static AssetsCache create(Path storage, Path... others) {
+		storage = storage.toAbsolutePath()
+		def objectsCache = new HashCache(storage.resolve("objects"))
+		def indexesCache = new EtagCache(storage.resolve("indexes"))
 
-		others.each { Path path ->
-			objectsCache.copyFromTrusted(path.resolve("objects"))
-//			indexesCache.copyFrom()
-		}
-
-		new AssetsCache(
+		def cache = new AssetsCache(
+			storage: storage,
 			objects: objectsCache,
 			indexes: indexesCache
 		)
+
+		others.each(cache.&copyFromTrusted)
+
+		cache
 	}
 
-	void getAssets() {
+	void getAssets(MinecraftVersion version) {
 
+	}
+
+	@CompileStatic(TypeCheckingMode.SKIP)
+	void getAssets(String assetsVersion) {
+		def index = new JsonSlurper().parseText(
+			indexes.get("$Constants.MinecraftIndexesBase/${assetsVersion}.json".toURL())
+		)
+
+		println index
+	}
+
+	/**
+	 * Copies all files from another cache to the current cache. Checks the
+	 * integrity of each file.
+	 *
+	 * The other cache should have exactly the same layout as this cache.
+	 *
+	 * @param otherCache the path to the cache to copy
+	 */
+	@Override
+	void copyFrom(Path otherCache) {
+		objects.copyFrom(otherCache.resolve(storage.relativize(objects.storage)))
+		indexes.copyFrom(otherCache.resolve(storage.relativize(indexes.storage)))
+	}
+
+	/**
+	 * Copies all files from another cache to the current cache. This variant
+	 * is faster because it trusts the cache to be correct and simply copies the
+	 * files directory.
+	 *
+	 * Default implementation is the same as {@link #copyFrom}.
+	 *
+	 * @param trustedCache the path to the cache to copy
+	 */
+	@Override
+	void copyFromTrusted(Path trustedCache) {
+		objects.copyFromTrusted(trustedCache.resolve(storage.relativize(objects.storage)))
+		indexes.copyFromTrusted(trustedCache.resolve(storage.relativize(indexes.storage)))
 	}
 }
