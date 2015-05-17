@@ -7,7 +7,6 @@ import org.apache.commons.codec.digest.DigestUtils
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
 
 /**
  * Implements a hash-addressed filesystem cache.
@@ -26,12 +25,14 @@ class HashCache extends Cache {
 	 * @param data the data to store.
 	 * @return the sha1 hash
 	 */
-	String store(String data) {
+	String store(byte[] data) {
 		def hash = DigestUtils.sha1Hex(data)
 
 		def file = getPath(hash).toFile()
-		if (!file.exists())
-			file.text = data
+		if (!file.exists()) {
+			file.parentFile.mkdirs()
+			file.bytes = data
+		}
 
 		hash
 	}
@@ -43,11 +44,11 @@ class HashCache extends Cache {
 	 * @param hash tha sha1 hash to look up.
 	 * @return the data.
 	 */
-	String get(String hash) {
+	byte[] get(String hash) {
 		def file = getPath(hash).toFile()
 
 		if (file.exists())
-			file.text
+			file.bytes
 		else
 			null
 	}
@@ -85,7 +86,8 @@ class HashCache extends Cache {
 	 */
 	@CompileStatic(TypeCheckingMode.SKIP)
 	DataHashPair download(URL URL) {
-		new DataHashPair(*_download(URL))
+		byte[] data = URL.bytes
+		new DataHashPair(store(data), data)
 	}
 
 	/**
@@ -95,21 +97,26 @@ class HashCache extends Cache {
 	 *
 	 * @param hash the hash of the file to download
 	 * @param URL
-	 * @return
+	 * @return the data
 	 */
-	@CompileStatic(TypeCheckingMode.SKIP)
-	String download(String hash, URL URL) {
+	byte[] download(String hash, URL URL) {
 		def file = getPath(hash).toFile()
-		if (file.exists()) {
-			file.text
-		} else {
-			def (String downloadedHash, String data) = _download(URL)
+		file.exists() ? file.bytes : _download(hash, URL)
+	}
 
-			if (!downloadedHash.equals(hash))
-				throw new InvalidResponseException("$URL did not match has $hash")
-
-			data
-		}
+	/**
+	 * Gets the contents of the URL given and stores it in the cache. This
+	 * method does not return the data.
+	 *
+	 * For data already in the cache this is significantly faster because we
+	 * do not need to read in the file contents.
+	 *
+	 * @param hash
+	 * @param URL
+	 */
+	void preDownload(String hash, URL URL) {
+		def file = getPath(hash).toFile()
+		if (!file.exists()) _download(hash, URL)
 	}
 
 	/**
@@ -124,7 +131,7 @@ class HashCache extends Cache {
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
 		     .forEach { Path path ->
-		         store(path.text)
+		         store(path.bytes)
 		     }
 	}
 
@@ -146,10 +153,16 @@ class HashCache extends Cache {
 		     }
 	}
 
-	private _download(URL URL) {
-		String data = URL.getText(connectTimeout: 10000, readTimeout: 2000)
 
-		[store(data), data]
+	private byte[] _download(String hash, URL URL) {
+		byte[] data = URL.bytes
+
+		String downloadedHash = store(data)
+
+		if (!downloadedHash.equals(hash))
+			throw new InvalidResponseException("$URL did not match hash \"$hash\"")
+
+		data
 	}
 
 	/**
@@ -166,9 +179,10 @@ class HashCache extends Cache {
 		}
 	}
 
-	static @Immutable
-	class DataHashPair {
-		String hash, data
+	@Immutable
+	static class DataHashPair {
+		String hash
+		byte[] data
 
 		boolean verify() {
 			DigestUtils.sha1Hex(data) == hash

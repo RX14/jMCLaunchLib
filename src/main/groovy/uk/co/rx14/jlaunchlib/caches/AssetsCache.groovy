@@ -51,7 +51,13 @@ class AssetsCache extends Cache {
 			indexes.get("$Constants.MinecraftIndexesBase/${assetsVersion}.json".toURL())
 		)
 
-		println index
+
+		index.objects.each {
+			String hash = it.value.hash
+			def URL = "$Constants.MinecraftAssetsBase/${hash.substring(0, 2)}/$hash".toURL()
+			println "Downloading $it.key: $URL"
+			objects.preDownload(hash, URL)
+		}
 	}
 
 	/**
