@@ -12,6 +12,7 @@ dependencies {
 	compile "org.codehaus.groovy:groovy-all:2.4.3"
 	compile "com.mashape.unirest:unirest-java:1.4.5"
 	compile "com.google.code.gson:gson:2.3.1"
+	compile "org.jboss.shrinkwrap.resolver:shrinkwrap-resolver-impl-maven:2.1.1"
 	compile "commons-codec:commons-codec:1.10"
 }
 

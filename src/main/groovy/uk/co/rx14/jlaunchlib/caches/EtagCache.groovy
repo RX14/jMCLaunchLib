@@ -19,10 +19,14 @@ class EtagCache extends Cache {
 	}
 
 	String get(URL URL) {
-		getPath(URL).toFile().parentFile.mkdirs()
+		def filePath = getPath(URL)
+		def etagPath = getEtagPath(URL)
 
-		if (getEtagPath(URL).toFile().exists() && !getPath(URL).toFile().exists())
-			getEtagPath(URL).toFile().delete()
+		filePath.toFile().parentFile.mkdirs()
+
+		if (etagPath.toFile().exists() && !filePath.toFile().exists()) {
+			etagPath.toFile().delete()
+		}
 
 		def localEtag = getLocalEtag(URL)
 		def request = Unirest.get(URL.toString())
@@ -36,10 +40,10 @@ class EtagCache extends Cache {
 		println "$URL: $response.status"
 
 		if (response.status == 304) { //Return from cache
-			getPath(URL).text
+			filePath.text
 		} else if (response.status == 200) { //Return from response
-			getEtagPath(URL).text = response.headers.getFirst("etag")
-			getPath(URL).text = response.body
+			etagPath.text = response.headers.getFirst("etag")
+			filePath.text = response.body
 			response.body
 		} else {
 			throw new HTTPException(response.status)

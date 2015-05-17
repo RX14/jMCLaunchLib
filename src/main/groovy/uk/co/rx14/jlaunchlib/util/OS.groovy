@@ -22,7 +22,10 @@ enum OS
 	}
 
 	public static OS getCurrentPlatform() {
-		String osName = System.getProperty("os.name").toLowerCase(Locale.US)
+		fromString(System.getProperty("os.name").toLowerCase(Locale.US))
+	}
+
+	public static OS fromString(String osName) {
 		for (OS os : values()) {
 			if (osName.contains(os.name)) return os
 			for (String alias : os.aliases) {

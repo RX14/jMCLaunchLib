@@ -1,10 +1,28 @@
 package uk.co.rx14.jlaunchlib
 
-import groovy.transform.Immutable
+import groovy.json.JsonSlurper
 import uk.co.rx14.jlaunchlib.caches.EtagCache
 
-@Immutable
 class MinecraftVersion {
-	String minecraftVersion
-	EtagCache versionCache
+	final String minecraftVersion
+	final EtagCache versionCache
+	private versionJson
+
+	MinecraftVersion(String minecraftVersion, EtagCache versionCache) {
+		this.minecraftVersion = minecraftVersion
+		this.versionCache = versionCache
+	}
+
+	def get() {
+		if (!versionJson) {
+			versionJson = new JsonSlurper().parseText(
+				versionCache.get("$Constants.MinecraftVersionsBase/$minecraftVersion/${minecraftVersion}.json".toURL())
+			)
+		}
+		versionJson
+	}
+
+	List getLibs() {
+		get().libraries
+	}
 }
