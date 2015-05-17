@@ -5,9 +5,13 @@ import groovy.transform.CompileStatic
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.logging.Logger
 
 @CompileStatic
 abstract class Cache {
+
+	private final static Logger LOGGER = Logger.getLogger(Cache.class.name)
+
 	abstract Path getStorage();
 
 	/**
@@ -20,6 +24,7 @@ abstract class Cache {
 	 * @param otherCache the path to the cache to copy
 	 */
 	void copyFrom(Path otherCache) {
+		LOGGER.info "Copying $otherCache to $storage"
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
 		     .forEach { Path path ->
@@ -41,6 +46,7 @@ abstract class Cache {
 	 * @param trustedCache the path to the cache to copy
 	 */
 	void copyFromTrusted(Path trustedCache) {
+		LOGGER.info "Copying trusted cache $trustedCache to $storage"
 		copyFrom(trustedCache)
 	}
 }

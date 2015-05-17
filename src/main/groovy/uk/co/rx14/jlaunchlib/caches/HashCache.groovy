@@ -7,6 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.logging.Logger
 
 /**
  * Implements a hash-addressed filesystem cache.
@@ -17,6 +18,9 @@ import java.nio.file.Path
 @CompileStatic
 @Immutable(knownImmutableClasses = [Path.class])
 class HashCache extends Cache {
+
+	private final static Logger LOGGER = Logger.getLogger(Cache.class.name)
+
 	Path storage
 
 	/**
@@ -128,6 +132,7 @@ class HashCache extends Cache {
 	 */
 	@Override
 	void copyFrom(Path otherCache) {
+		LOGGER.info "Copying $otherCache to $storage"
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
 		     .forEach { Path path ->
@@ -143,6 +148,7 @@ class HashCache extends Cache {
 	 */
 	@Override
 	void copyFromTrusted(Path trustedCache) {
+		LOGGER.info "Copying trusted cache $trustedCache to $storage"
 		Files.walk(trustedCache)
 		     .filter(Files.&isRegularFile)
 		     .filter { !has(it.toFile().name) }

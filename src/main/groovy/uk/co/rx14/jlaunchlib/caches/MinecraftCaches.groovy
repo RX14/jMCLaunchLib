@@ -4,22 +4,28 @@ import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 
 import java.nio.file.Path
+import java.util.logging.Logger
 
 @CompileStatic
 @Immutable(knownImmutableClasses = [Path.class])
 class MinecraftCaches extends Cache {
 
+	private final static Logger LOGGER = Logger.getLogger(MinecraftCaches.class.name)
 
 	Path storage
 	AssetsCache assets
 	EtagCache versions
 
-		new MinecraftCaches(
 	static MinecraftCaches create(Path storage) {
+		def cache = new MinecraftCaches(
 			storage: storage,
 			assets: AssetsCache.create(storage.resolve("assets")),
 			versions: new EtagCache(storage.resolve("versions"))
 		)
+
+		LOGGER.fine "Created $cache"
+
+		cache
 	}
 
 	@Override

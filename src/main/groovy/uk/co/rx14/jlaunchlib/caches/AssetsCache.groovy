@@ -8,10 +8,14 @@ import uk.co.rx14.jlaunchlib.Constants
 import uk.co.rx14.jlaunchlib.MinecraftVersion
 
 import java.nio.file.Path
+import java.util.logging.Logger
 
 @CompileStatic
 @Immutable(knownImmutableClasses = [Path.class])
 class AssetsCache extends Cache {
+
+	private final static Logger LOGGER = Logger.getLogger(AssetsCache.class.name)
+
 	Path storage
 	HashCache objects
 	EtagCache indexes
@@ -35,6 +39,8 @@ class AssetsCache extends Cache {
 			objects: objectsCache,
 			indexes: indexesCache
 		)
+
+		LOGGER.fine "Created $cache"
 
 		others.each(cache.&copyFromTrusted)
 
@@ -71,6 +77,7 @@ class AssetsCache extends Cache {
 	 */
 	@Override
 	void copyFrom(Path otherCache) {
+		LOGGER.info "Copying cache $otherCache to $storage"
 		objects.copyFrom(otherCache.resolve(storage.relativize(objects.storage)))
 		indexes.copyFrom(otherCache.resolve(storage.relativize(indexes.storage)))
 	}
@@ -86,6 +93,8 @@ class AssetsCache extends Cache {
 	 */
 	@Override
 	void copyFromTrusted(Path trustedCache) {
+		LOGGER.info "Copying trusted cache $trustedCache to $storage"
+
 		objects.copyFromTrusted(trustedCache.resolve(storage.relativize(objects.storage)))
 		indexes.copyFromTrusted(trustedCache.resolve(storage.relativize(indexes.storage)))
 	}
