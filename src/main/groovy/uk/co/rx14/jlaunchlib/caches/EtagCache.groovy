@@ -42,7 +42,7 @@ class EtagCache extends Cache {
 	private List<Path> getFilenames(URL URL) {
 		if (URL.file.endsWith("/")) return null
 
-		def file = storage.resolve(URL.path.substring(URL.path.lastIndexOf("/")) + 1)
+		def file = storage.resolve(URL.path.substring(URL.path.lastIndexOf("/") + 1))
 		[storage.resolve(file), storage.resolve("${file}.etag")]
 	}
 }
