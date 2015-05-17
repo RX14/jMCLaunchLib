@@ -5,7 +5,6 @@ import groovy.transform.Immutable
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.codec.digest.DigestUtils
 
-import java.nio.file.CopyOption
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -18,7 +17,7 @@ import java.nio.file.StandardCopyOption
  */
 @CompileStatic
 @Immutable(knownImmutableClasses = [Path.class])
-class HashCache {
+class HashCache extends Cache {
 	Path storage
 
 	/**
@@ -116,10 +115,11 @@ class HashCache {
 	/**
 	 * Copies all files from the other cache to the current cache. This method
 	 * does not trust the contents of the cache therefore simply uses
-	 * {@link #store } to save the contents of each file into the cache.
+	 * {@link #store} to save the contents of each file into the cache.
 	 *
 	 * @param otherCache the path to the cache to copy
 	 */
+	@Override
 	void copyFrom(Path otherCache) {
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
@@ -132,10 +132,11 @@ class HashCache {
 	 * Copies all files from another cache to this one. This variant is faster
 	 * because it trusts the cache to be correct and simply copies the files directory.
 	 *
-	 * @param otherCache the path to the cache to copy
+	 * @param trustedCache the path to the cache to copy
 	 */
-	void copyFromTrusted(Path otherCache) {
-		Files.walk(otherCache)
+	@Override
+	void copyFromTrusted(Path trustedCache) {
+		Files.walk(trustedCache)
 		     .filter(Files.&isRegularFile)
 		     .forEach { Path path ->
 		         Files.copy(path, getPath(path.toFile().name), StandardCopyOption.REPLACE_EXISTING)
