@@ -51,6 +51,7 @@ class AssetsCache extends Cache {
 			indexes.get("$Constants.MinecraftIndexesBase/${assetsVersion}.json".toURL())
 		)
 
+		objects.verify(HashCache.VerificationAction.DELETE)
 
 		index.objects.each {
 			String hash = it.value.hash

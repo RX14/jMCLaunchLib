@@ -153,6 +153,21 @@ class HashCache extends Cache {
 		     }
 	}
 
+	void verify(VerificationAction action) {
+		if (!storage.toFile().exists()) return
+		Files.walk(storage)
+		     .filter(Files.&isRegularFile)
+		     .filter { DigestUtils.sha1Hex(it.bytes) != it.toFile().name }
+		     .forEach { Path path ->
+		         println "REHASH $path"
+		         switch (action) {
+		             case VerificationAction.REHASH:
+		                 store(path.bytes)
+		             case VerificationAction.DELETE:
+		                 path.toFile().delete()
+		         }
+		     }
+	}
 
 	private byte[] _download(String hash, URL URL) {
 		byte[] data = URL.bytes
@@ -187,5 +202,9 @@ class HashCache extends Cache {
 		boolean verify() {
 			DigestUtils.sha1Hex(data) == hash
 		}
+	}
+
+	enum VerificationAction {
+		REHASH, DELETE
 	}
 }
