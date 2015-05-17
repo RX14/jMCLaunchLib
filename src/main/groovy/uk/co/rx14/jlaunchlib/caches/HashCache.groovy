@@ -138,8 +138,11 @@ class HashCache extends Cache {
 	void copyFromTrusted(Path trustedCache) {
 		Files.walk(trustedCache)
 		     .filter(Files.&isRegularFile)
+		     .filter { !has(it.toFile().name) }
 		     .forEach { Path path ->
-		         Files.copy(path, getPath(path.toFile().name), StandardCopyOption.REPLACE_EXISTING)
+		         def destination = getPath(path.toFile().name)
+		         destination.toFile().parentFile.mkdirs()
+		         Files.copy(path, destination)
 		     }
 	}
 
