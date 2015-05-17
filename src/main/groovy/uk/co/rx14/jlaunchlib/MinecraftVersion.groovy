@@ -7,6 +7,4 @@ import uk.co.rx14.jlaunchlib.caches.EtagCache
 class MinecraftVersion {
 	String minecraftVersion
 	EtagCache versionCache
-
-//	void
 }
