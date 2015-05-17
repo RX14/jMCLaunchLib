@@ -4,6 +4,7 @@ import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import uk.co.rx14.jlaunchlib.exceptions.ForbiddenOperationException
 
 import static uk.co.rx14.jlaunchlib.auth.MinecraftAuthResult.Profile
 
