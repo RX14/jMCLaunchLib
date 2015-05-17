@@ -24,7 +24,9 @@ abstract class Cache {
 		     .filter(Files.&isRegularFile)
 		     .forEach { Path path ->
 		         try {
-			         Files.copy(path, path.relativize(otherCache).resolve(storage))
+			         def destination = storage.resolve(otherCache.relativize(path))
+			         destination.toFile().parentFile.mkdirs()
+			         Files.copy(path, destination)
 		         } catch (FileAlreadyExistsException ignored) {} //Leave it
 		     }
 	}
