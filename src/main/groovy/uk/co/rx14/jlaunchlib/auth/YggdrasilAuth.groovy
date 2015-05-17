@@ -6,14 +6,16 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import uk.co.rx14.jlaunchlib.exceptions.ForbiddenOperationException
 
+import java.util.function.Supplier
+
 import static uk.co.rx14.jlaunchlib.auth.MinecraftAuthResult.Profile
 
 public class YggdrasilAuth implements MinecraftAuth {
 
 	@Override
-	MinecraftAuthResult auth(CredentialsProvider provider) {
+	MinecraftAuthResult auth(Supplier<Credentials> provider) {
 		if (!provider) throw new IllegalArgumentException("CredentialsProvider is null")
-		Credentials credentials = provider.ask();
+		Credentials credentials = provider.get();
 		if (!credentials) throw new IllegalArgumentException("Credentials are null")
 
 		def res = request("authenticate", [

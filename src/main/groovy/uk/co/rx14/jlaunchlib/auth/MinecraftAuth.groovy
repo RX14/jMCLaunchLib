@@ -1,17 +1,20 @@
-package uk.co.rx14.jlaunchlib.auth;
+package uk.co.rx14.jlaunchlib.auth
+
+import java.util.function.Supplier;
 
 public interface MinecraftAuth {
 	/**
 	 * Uses the given credentials to generate a new
 	 * {@link MinecraftAuthResult}.
 	 *
-	 * @param credentialsProvider The provider of the credentials to
-	 *                            authenticate with.
+	 * @param credentialsSupplier The provider of the credentials to
+	 * authenticate with.
 	 * @return the authentication result to use in the minecraft arguments.
-	 * @throws uk.co.rx14.jlaunchlib.exceptions.ForbiddenOperationException when the credentials are invalid.
+	 * @throws uk.co.rx14.jlaunchlib.exceptions.ForbiddenOperationException when
+	 * the credentials are invalid.
 	 * @throws IllegalArgumentException when something is null.
 	 */
-	MinecraftAuthResult auth(CredentialsProvider credentialsProvider);
+	MinecraftAuthResult auth(Supplier<Credentials> credentialsSupplier);
 
 	/**
 	 * Refreshes a previously-valid {@link MinecraftAuthResult}. If the
