@@ -1,6 +1,5 @@
 package uk.co.rx14.jlaunchlib.caches
 
-import org.apache.commons.io.IOUtils
 import org.jboss.shrinkwrap.resolver.api.maven.ConfigurableMavenResolverSystem
 import org.jboss.shrinkwrap.resolver.api.maven.Maven
 import uk.co.rx14.jlaunchlib.Constants
@@ -12,13 +11,12 @@ import uk.co.rx14.jlaunchlib.util.Zip
 import java.nio.file.Path
 import java.util.logging.Logger
 import java.util.stream.Collectors
-import java.util.zip.ZipFile
 
 class MinecraftMaven {
 
 	private final static Logger LOGGER = Logger.getLogger(MinecraftMaven.class.name)
 
-	static ConfigurableMavenResolverSystem RESOLVER =
+	private final static ConfigurableMavenResolverSystem RESOLVER =
 		Maven.configureResolver()
 		     .withClassPathResolution(false)
 		     .withMavenCentralRepo(true)
@@ -26,7 +24,7 @@ class MinecraftMaven {
 		     .withRemoteRepo("minecraft-libs", Constants.MinecraftLibsBase, "default")
 
 
-	static File resolve(String identifier) {
+	File resolve(String identifier) {
 		LOGGER.info "Resolving dependency: $identifier"
 		RESOLVER.resolve(identifier).withoutTransitivity().asSingleFile()
 	}
