@@ -33,11 +33,15 @@ class HashCache extends Cache {
 	 */
 	String store(byte[] data) {
 		def hash = DigestUtils.sha1Hex(data)
-
 		def file = getPath(hash).toFile()
+
+
 		if (!file.exists()) {
+			LOGGER.finer "[$storage] Storing $hash in $file"
 			file.parentFile.mkdirs()
 			file.bytes = data
+		} else {
+			LOGGER.finer "[$storage] Not storing $hash in $file: already exists"
 		}
 
 		hash
@@ -53,10 +57,14 @@ class HashCache extends Cache {
 	byte[] get(String hash) {
 		def file = getPath(hash).toFile()
 
-		if (file.exists())
+		if (file.exists()) {
+			LOGGER.finer "[$storage] Got $hash"
 			file.bytes
-		else
+		}
+		else {
+			LOGGER.finer "[$storage] Not getting $hash: doesn't exist"
 			null
+		}
 	}
 
 	/**
@@ -92,6 +100,7 @@ class HashCache extends Cache {
 	 */
 	@CompileStatic(TypeCheckingMode.SKIP)
 	DataHashPair download(URL URL) {
+		LOGGER.fine "[$storage] Downloading $URL"
 		byte[] data = URL.bytes
 		new DataHashPair(store(data), data)
 	}
@@ -106,6 +115,7 @@ class HashCache extends Cache {
 	 * @return the data
 	 */
 	byte[] download(String hash, URL URL) {
+		LOGGER.fine "[$storage] Downloading $URL with expected hash $hash"
 		def file = getPath(hash).toFile()
 		file.exists() ? file.bytes : _download(hash, URL)
 	}
@@ -121,6 +131,7 @@ class HashCache extends Cache {
 	 * @param URL
 	 */
 	void preDownload(String hash, URL URL) {
+		LOGGER.fine "[$storage] Predownloading $URL with expected hash $hash"
 		def file = getPath(hash).toFile()
 		if (!file.exists()) _download(hash, URL)
 	}
@@ -134,7 +145,7 @@ class HashCache extends Cache {
 	 */
 	@Override
 	void copyFrom(Path otherCache) {
-		LOGGER.info "Copying $otherCache to $storage"
+		LOGGER.info "[$storage] Copying from $otherCache"
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
 		     .forEach { Path path ->
@@ -150,7 +161,7 @@ class HashCache extends Cache {
 	 */
 	@Override
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.info "Copying trusted cache $trustedCache to $storage"
+		LOGGER.info "[$storage] Copying from trusted cache $trustedCache"
 		Files.walk(trustedCache)
 		     .filter(Files.&isRegularFile)
 		     .filter { !has(it.toFile().name) }
@@ -162,12 +173,16 @@ class HashCache extends Cache {
 	}
 
 	void verify(VerificationAction action) {
-		if (!storage.toFile().exists()) return
+		if (!storage.toFile().exists()) {
+			LOGGER.info "[$storage] Not verifying cache: storage does not exist"
+			return
+		}
+		LOGGER.info "[$storage] Verifying cache"
 		Files.walk(storage)
 		     .filter(Files.&isRegularFile)
 		     .filter { DigestUtils.sha1Hex(it.bytes) != it.toFile().name }
 		     .forEach { Path path ->
-		         println "REHASH $path"
+		         LOGGER.warning "[$storage] File $path did not match expected hash: ${action == VerificationAction.DELETE ? "deleting" : "rehashing"} file."
 		         switch (action) {
 		             case VerificationAction.REHASH:
 		                 store(path.bytes)

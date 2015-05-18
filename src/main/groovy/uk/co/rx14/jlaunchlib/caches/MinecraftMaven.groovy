@@ -25,7 +25,7 @@ class MinecraftMaven {
 
 
 	File resolve(String identifier) {
-		LOGGER.info "Resolving dependency: $identifier"
+		LOGGER.fine "Resolving dependency: $identifier"
 		RESOLVER.resolve(identifier).withoutTransitivity().asSingleFile()
 	}
 
