@@ -19,7 +19,7 @@ import java.util.logging.Logger
 @Immutable(knownImmutableClasses = [Path.class])
 class HashCache extends Cache {
 
-	private final static Logger LOGGER = Logger.getLogger(Cache.class.name)
+	private final static Logger LOGGER = Logger.getLogger(HashCache.class.name)
 
 	Path storage
 

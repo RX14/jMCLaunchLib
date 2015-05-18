@@ -12,7 +12,7 @@ import java.util.logging.Logger
 @Immutable(knownImmutableClasses = [Path.class])
 class EtagCache extends Cache {
 
-	private final static Logger LOGGER = Logger.getLogger(MinecraftMaven.class.name)
+	private final static Logger LOGGER = Logger.getLogger(EtagCache.class.name)
 
 	Path storage
 
