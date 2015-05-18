@@ -56,7 +56,7 @@ class AssetsCache extends Cache {
 	@CompileStatic(TypeCheckingMode.SKIP)
 	void getAssets(String assetsVersion) {
 		def index = new JsonSlurper().parseText(
-			indexes.get("$Constants.MinecraftIndexesBase/${assetsVersion}.json".toURL())
+			new String(indexes.get("$Constants.MinecraftIndexesBase/${assetsVersion}.json".toURL()))
 		)
 
 		objects.verify(HashCache.VerificationAction.DELETE)

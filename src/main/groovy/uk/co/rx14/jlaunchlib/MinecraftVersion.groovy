@@ -16,7 +16,7 @@ class MinecraftVersion {
 	def get() {
 		if (!versionJson) {
 			versionJson = new JsonSlurper().parseText(
-				versionCache.get("$Constants.MinecraftVersionsBase/$minecraftVersion/${minecraftVersion}.json".toURL())
+				new String(versionCache.get("$Constants.MinecraftVersionsBase/$version/${version}.json".toURL()))
 			)
 		}
 		versionJson

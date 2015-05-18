@@ -24,7 +24,7 @@ class EtagCache extends Cache {
 		etagFile.exists() ? etagFile.text : null
 	}
 
-	String get(URL URL) {
+	byte[] get(URL URL) {
 		LOGGER.fine "Getting $URL"
 
 		def filePath = getPath(URL)
@@ -46,30 +46,30 @@ class EtagCache extends Cache {
 		}
 
 		def startTime = System.nanoTime()
-		def response = request.asString()
+		def response = request.asBinary()
 		def time = System.nanoTime() - startTime
 
 		if (response.status == 304) { //Return from cache
 			LOGGER.info "$URL returned 304 in ${time / 1000000000}s: using cache"
-			filePath.text
+			filePath.bytes
 		} else if (response.status == 200) { //Return from response
 			LOGGER.info "$URL returned 200 in ${time / 1000000000}s: caching"
 			LOGGER.fine "Etag was ${response.headers.getFirst("etag")}"
 			etagPath.text = response.headers.getFirst("etag")
-			filePath.text = response.body
-			response.body
+			filePath.bytes = response.body.bytes
+			response.body.bytes
 		} else {
 			LOGGER.warning "$URL returned $response.status in ${time / 1000000000}s: error"
 			throw new HTTPException(response.status)
 		}
 	}
 
-	private Path getPath(URL URL) {
+	Path getPath(URL URL) {
 		if (URL.file.endsWith("/")) return null
 		storage.resolve(URL.path.substring(URL.path.lastIndexOf("/") + 1))
 	}
 
-	private Path getEtagPath(URL URL) {
+	Path getEtagPath(URL URL) {
 		if (URL.file.endsWith("/")) return null
 		new File("${getPath(URL)}.etag").toPath()
 	}
