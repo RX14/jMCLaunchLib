@@ -7,13 +7,17 @@ import groovy.json.JsonSlurper
 import uk.co.rx14.jlaunchlib.exceptions.ForbiddenOperationException
 
 import java.util.function.Supplier
+import java.util.logging.Logger
 
 import static uk.co.rx14.jlaunchlib.auth.MinecraftAuthResult.Profile
 
 public class YggdrasilAuth implements MinecraftAuth {
 
+	private final static Logger LOGGER = Logger.getLogger(YggdrasilAuth.class.name)
+
 	@Override
 	MinecraftAuthResult auth(Supplier<Credentials> provider) {
+		LOGGER.info "Starting Minecraft authentication"
 		if (!provider) throw new IllegalArgumentException("CredentialsProvider is null")
 		Credentials credentials = provider.get();
 		if (!credentials) throw new IllegalArgumentException("Credentials are null")
@@ -28,6 +32,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 		])
 
 		if (res.error) {
+			LOGGER.warning "Minecraft authentication failed with: $res"
 			if (res.error == "ForbiddenOperationException") {
 				throw new ForbiddenOperationException(res.errorMessage)
 			} else if (res.error == "IllegalArgumentException") {
@@ -36,6 +41,8 @@ public class YggdrasilAuth implements MinecraftAuth {
 				throw new RuntimeException(res.errorMessage)
 			}
 		}
+
+		LOGGER.info "Authenticated successfully"
 
 		new MinecraftAuthResult(
 			accessToken: res.accessToken,
@@ -50,6 +57,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 
 	@Override
 	MinecraftAuthResult refresh(MinecraftAuthResult previous) {
+		LOGGER.info "Starting Minecraft token refresh"
 		if (!previous.valid) throw new IllegalArgumentException("MinecraftAuthResult is not valid")
 
 		def res = request("refresh", [
@@ -65,7 +73,11 @@ public class YggdrasilAuth implements MinecraftAuth {
 					selectedProfile: previous.selectedProfile,
 					valid: false
 				)
-			} else if (res.error == "ForbiddenOperationException") {
+			}
+
+			LOGGER.warning "Minecraft token refresh failed with: $res"
+
+			if (res.error == "ForbiddenOperationException") {
 				throw new ForbiddenOperationException((String) res.errorMessage)
 			} else if (res.error == "IllegalArgumentException") {
 				throw new IllegalArgumentException((String) res.errorMessage)
@@ -73,6 +85,8 @@ public class YggdrasilAuth implements MinecraftAuth {
 				throw new RuntimeException((String) res.errorMessage)
 			}
 		}
+
+		LOGGER.info "Refreshed token successfully"
 
 		new MinecraftAuthResult(
 			accessToken: res.accessToken,
@@ -88,15 +102,15 @@ public class YggdrasilAuth implements MinecraftAuth {
 	def request(String path, body) {
 		def jsonBody = JsonOutput.toJson(body)
 
-		println jsonBody
-
+		def startTime = System.nanoTime()
 		HttpResponse<String> response =
 			Unirest.post("https://authserver.mojang.com/$path")
 			       .header("Content-Type", "application/json")
 			       .body(jsonBody)
 			       .asString();
 
-		println response.body
+		def time = System.nanoTime() - startTime
+		LOGGER.fine "Completed $path request in ${time / 1000000000}s"
 
 		new JsonSlurper().parseText(response.body)
 	}

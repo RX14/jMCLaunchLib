@@ -2,6 +2,8 @@ package uk.co.rx14.jlaunchlib.util
 
 import groovy.transform.CompileStatic
 
+import java.util.logging.Logger
+
 @CompileStatic
 enum OS
 {
@@ -13,15 +15,19 @@ enum OS
 	private String name
 	private String[] aliases
 
-	public static final OS CURRENT = getCurrentPlatform()
+	public static final OS CURRENT = _getCurrentPlatform()
 	public static final String VERSION = System.getProperty("os.version")
+
+	static {
+		Logger.getLogger(OS.class.getName()).info "Detected OS '$CURRENT' version '$VERSION'"
+	}
 
 	private OS(String name, String... aliases) {
 		this.name = name
 		this.aliases = aliases
 	}
 
-	public static OS getCurrentPlatform() {
+	private static OS _getCurrentPlatform() {
 		fromString(System.getProperty("os.name").toLowerCase(Locale.US))
 	}
 

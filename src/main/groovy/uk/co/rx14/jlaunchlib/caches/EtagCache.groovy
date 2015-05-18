@@ -59,7 +59,7 @@ class EtagCache extends Cache {
 			filePath.text = response.body
 			response.body
 		} else {
-			LOGGER.warning "$URL returned 200 in ${time / 1000000000}s: error"
+			LOGGER.warning "$URL returned $response.status in ${time / 1000000000}s: error"
 			throw new HTTPException(response.status)
 		}
 	}

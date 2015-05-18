@@ -40,13 +40,13 @@ class MinecraftMaven {
 				def (String G, String A, String V) = specifier.split(":")
 				String C
 				lib.natives.each { Map.Entry entry ->
-					if (OS.fromString(entry.key) == OS.currentPlatform) {
+					if (OS.fromString(entry.key) == OS.CURRENT) {
 						C = entry.value.replace('${arch}', System.getProperty("sun.arch.data.model"))
 					}
 				}
 				def file = resolve("$G:$A:jar:$C:$V")
 				if (lib.extract) {
-					LOGGER.info "Extracting $file to natives directory $nativesDirectory with exclusions: $lib.extract.exclude"
+					LOGGER.info "Extracting $file to natives directory $nativesDirectory"
 					Zip.extractWithExclude(file, nativesDirectory, lib.extract.exclude)
 				}
 				file
@@ -62,12 +62,12 @@ class MinecraftMaven {
 			lib.rules.each { rule ->
 				LOGGER.finest "Currently ${download ? "allowing" : "disallowing"} $lib.name"
 				if (rule.os) {
-					if (OS.fromString(rule.os.name) == OS.currentPlatform) {
-						LOGGER.finest "Rule OS '$rule.os.name' matched '$OS.currentPlatform'"
+					if (OS.fromString(rule.os.name) == OS.CURRENT) {
+						LOGGER.finest "Rule OS '$rule.os.name' matched '$OS.CURRENT'"
 						LOGGER.finest "Applying rule action $rule.action"
 						download = rule.action == "allow"
 					} else {
-						LOGGER.finest "Rule OS '$rule.os.name' did not match '$OS.currentPlatform'"
+						LOGGER.finest "Rule OS '$rule.os.name' did not match '$OS.CURRENT'"
 					}
 				} else {
 					LOGGER.finest "Applying rule action $rule.action"

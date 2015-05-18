@@ -3,10 +3,18 @@ package uk.co.rx14.jlaunchlib.util
 import groovy.transform.CompileStatic
 
 import java.nio.file.Path
+import java.util.logging.Logger
 
 @CompileStatic
-class Minecraft {
-	static Path getMinecraftDirectory()
+final class Minecraft {
+
+	public static final Path minecraftDirectory = _getMinecraftDirectory()
+
+	static {
+		Logger.getLogger(Minecraft.class.name).info "Detected minecraft directory: $minecraftDirectory"
+	}
+
+	private static Path _getMinecraftDirectory()
 	{
 		String userDir = System.getProperty("user.home")
 
