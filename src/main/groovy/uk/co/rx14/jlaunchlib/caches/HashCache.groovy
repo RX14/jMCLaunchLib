@@ -2,6 +2,7 @@ package uk.co.rx14.jlaunchlib.caches
 
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
+import groovy.transform.ToString
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.codec.digest.DigestUtils
 
@@ -16,6 +17,7 @@ import java.util.logging.Logger
  * {@code ab/ab615a912fb8ea06648836e0ec1cbeeefe117da6}
  */
 @CompileStatic
+@ToString(includePackage = false, includeNames = true)
 @Immutable(knownImmutableClasses = [Path.class])
 class HashCache extends Cache {
 

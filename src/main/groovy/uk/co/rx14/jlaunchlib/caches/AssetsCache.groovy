@@ -3,6 +3,7 @@ package uk.co.rx14.jlaunchlib.caches
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
+import groovy.transform.ToString
 import groovy.transform.TypeCheckingMode
 import uk.co.rx14.jlaunchlib.Constants
 import uk.co.rx14.jlaunchlib.MinecraftVersion
@@ -11,6 +12,7 @@ import java.nio.file.Path
 import java.util.logging.Logger
 
 @CompileStatic
+@ToString(includePackage = false, includeNames = true)
 @Immutable(knownImmutableClasses = [Path.class])
 class AssetsCache extends Cache {
 

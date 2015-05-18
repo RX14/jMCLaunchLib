@@ -3,12 +3,14 @@ package uk.co.rx14.jlaunchlib.caches
 import com.mashape.unirest.http.Unirest
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
+import groovy.transform.ToString
 
 import javax.xml.ws.http.HTTPException
 import java.nio.file.Path
 import java.util.logging.Logger
 
 @CompileStatic
+@ToString(includePackage = false, includeNames = true)
 @Immutable(knownImmutableClasses = [Path.class])
 class EtagCache extends Cache {
 

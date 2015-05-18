@@ -2,11 +2,13 @@ package uk.co.rx14.jlaunchlib.caches
 
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
+import groovy.transform.ToString
 
 import java.nio.file.Path
 import java.util.logging.Logger
 
 @CompileStatic
+@ToString(includePackage = false, includeNames = true)
 @Immutable(knownImmutableClasses = [Path.class])
 class MinecraftCaches extends Cache {
 
