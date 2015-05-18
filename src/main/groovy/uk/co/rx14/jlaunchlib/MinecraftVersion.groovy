@@ -4,12 +4,12 @@ import groovy.json.JsonSlurper
 import uk.co.rx14.jlaunchlib.caches.EtagCache
 
 class MinecraftVersion {
-	final String minecraftVersion
+	final String version
 	final EtagCache versionCache
 	private versionJson
 
 	MinecraftVersion(String minecraftVersion, EtagCache versionCache) {
-		this.minecraftVersion = minecraftVersion
+		this.version = minecraftVersion
 		this.versionCache = versionCache
 	}
 
@@ -24,5 +24,9 @@ class MinecraftVersion {
 
 	List getLibs() {
 		get().libraries
+	}
+
+	URL getDownloadUrl() {
+		"$Constants.MinecraftVersionsBase/$version/${version}.jar".toURL()
 	}
 }

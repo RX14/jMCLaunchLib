@@ -37,11 +37,11 @@ class HashCache extends Cache {
 
 
 		if (!file.exists()) {
-			LOGGER.finer "[$storage] Storing $hash in $file"
+			LOGGER.finest "[$storage] Storing $hash in $file"
 			file.parentFile.mkdirs()
 			file.bytes = data
 		} else {
-			LOGGER.finer "[$storage] Not storing $hash in $file: already exists"
+			LOGGER.finest "[$storage] Not storing $hash in $file: already exists"
 		}
 
 		hash

@@ -74,7 +74,7 @@ class MinecraftMaven {
 					download = rule.action == "allow"
 				}
 			}
-			LOGGER.info "${download ? "Allowed" : "Disallowed"} $lib.name $lib"
+			LOGGER.fine "${download ? "Allowed" : "Disallowed"} $lib.name $lib"
 			download
 		} else true
 	}

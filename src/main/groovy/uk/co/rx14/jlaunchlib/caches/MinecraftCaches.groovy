@@ -18,13 +18,15 @@ class MinecraftCaches extends Cache {
 	AssetsCache assets
 	MinecraftMaven libs
 	EtagCache versions
+	Path natives
 
 	static MinecraftCaches create(Path storage) {
 		def cache = new MinecraftCaches(
 			storage: storage,
 			assets: AssetsCache.create(storage.resolve("assets")),
 			libs: new MinecraftMaven(),
-			versions: new EtagCache(storage.resolve("versions"))
+			versions: new EtagCache(storage.resolve("versions")),
+			natives: storage.resolve("natives")
 		)
 
 		LOGGER.fine "Created $cache"

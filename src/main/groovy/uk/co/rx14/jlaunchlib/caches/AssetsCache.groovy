@@ -49,12 +49,18 @@ class AssetsCache extends Cache {
 		cache
 	}
 
-	void getAssets(MinecraftVersion version) {
-
+	@CompileStatic(TypeCheckingMode.SKIP)
+	Path getAssets(MinecraftVersion version) {
+		if (version.get().assets) {
+			_getAssets(version.get().assets)
+			storage
+		} else {
+			_getLegacyAssets(version.version)
+		}
 	}
 
 	@CompileStatic(TypeCheckingMode.SKIP)
-	void getAssets(String assetsVersion) {
+	private void _getAssets(String assetsVersion) {
 		def index = new JsonSlurper().parseText(
 			new String(indexes.get("$Constants.MinecraftIndexesBase/${assetsVersion}.json".toURL()))
 		)
@@ -64,9 +70,17 @@ class AssetsCache extends Cache {
 		index.objects.each {
 			String hash = it.value.hash
 			def URL = "$Constants.MinecraftAssetsBase/${hash.substring(0, 2)}/$hash".toURL()
-			println "Downloading $it.key: $URL"
-			objects.preDownload(hash, URL)
+			if (!objects.has(hash)) {
+				LOGGER.info "Downloading $it.key"
+				objects.preDownload(hash, URL)
+			} else {
+				LOGGER.finer "Not Downloading $hash: in cache ($URL)"
+			}
 		}
+	}
+
+	private Path _getLegacyAssets(String minecraftVersion) {
+		throw new UnsupportedOperationException("Legacy assets not supported... for now :3")
 	}
 
 	/**
