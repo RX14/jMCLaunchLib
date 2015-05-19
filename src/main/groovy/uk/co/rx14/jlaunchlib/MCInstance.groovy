@@ -50,12 +50,12 @@ class MCInstance {
 		spec.offline = true
 
 		spec.auth = new MinecraftAuthResult(
-			accessToken: null,
-			clientToken: null,
+			accessToken: '',
+			clientToken: '',
 			valid: true,
 			selectedProfile: new MinecraftAuthResult.Profile(
 				name: username,
-				id: null
+				id: ''
 			)
 		)
 
@@ -79,6 +79,9 @@ class MCInstance {
 
 	@CompileStatic(TypeCheckingMode.SKIP)
 	private void _commonTasks(LaunchSpec spec) {
+
+		spec.minecraftDirectory = minecraftDirectory
+
 		getting "Minecraft Libraries", {
 			spec.classpath.addAll(caches.libs.getLibs(minecraftVersion, caches.natives.resolve(minecraftVersion.version)))
 		}
@@ -94,33 +97,28 @@ class MCInstance {
 
 		spec.launchArgs = getArgs(spec)
 
-		spec.jvmArgs = "-Djava.library.path=\"${caches.natives.resolve(minecraftVersion.version).toAbsolutePath()}\""
+		spec.jvmArgs = ["-Djava.library.path=${caches.natives.resolve(minecraftVersion.version).toAbsolutePath()}"].toArray()
 
 		spec.mainClass = minecraftVersion.get().mainClass
 	}
 
 	@CompileStatic(TypeCheckingMode.SKIP)
-	private String getArgs(LaunchSpec spec) {
+	private String[] getArgs(LaunchSpec spec) {
 		String args = minecraftVersion.get().minecraftArguments
-
-		if (spec.offline) {
-			args.replaceFirst('--username $\\{.*\\}', "")
-		} else {
-			args = args.replace('${auth_uuid}', spec.auth.clientToken)
-			args = args.replace('${auth_access_token}', spec.auth.accessToken)
-			args = args.replace('${auth_session}', spec.auth.accessToken)
-		}
 
 		args = args.replace('${auth_player_name}', spec.auth.selectedProfile.name)
 		args = args.replace('${version_name}', minecraftVersion.version)
-		args = args.replace('${game_directory}', "\"${minecraftDirectory.toAbsolutePath()}\"")
-		args = args.replace('${game_assets}', "\"${spec.assetsPath.toAbsolutePath()}\"")
-		args = args.replace('${assets_root}', "\"${caches.assets.storage.toAbsolutePath()}\"")
+		args = args.replace('${game_directory}', "${minecraftDirectory.toAbsolutePath()}")
+		args = args.replace('${game_assets}', "${spec.assetsPath.toAbsolutePath()}")
+		args = args.replace('${assets_root}', "${caches.assets.storage.toAbsolutePath()}")
 		args = args.replace('${assets_index_name}', minecraftVersion.get().assets)
 		args = args.replace('${user_properties}', "{}")
 		args = args.replace('--userType ${user_type}', "")
+		args = args.replace('${auth_uuid}', spec.auth.clientToken)
+		args = args.replace('${auth_access_token}', spec.auth.accessToken)
+		args = args.replace('${auth_session}', spec.auth.accessToken)
 
-		args
+		args.split(" ")
 	}
 
 	private static getting(String name, Closure closure) {
@@ -132,26 +130,42 @@ class MCInstance {
 	}
 
 	static class LaunchSpec {
+		Path minecraftDirectory
 		List<File> classpath = new ArrayList<>()
 		Path assetsPath
 		MinecraftAuthResult auth
-		String launchArgs
-		String jvmArgs
+		String[] launchArgs
+		String[] jvmArgs
 		boolean offline
 		String mainClass
 
-		String getClasspathArg() {
-			def cp = "-cp "
+		String getClasspathString() {
+			def cp = ""
 
 			classpath.each { File file ->
-				cp += "\"$file.absoluteFile\";"
+				cp += "$file.absoluteFile$File.pathSeparatorChar"
 			}
+
+			cp = cp.substring(0, cp.length() - 1) //Remove last separator
 
 			cp
 		}
 
+		String getClasspathArg() {
+			"-cp $classpathString"
+		}
+
+		String[] getJavaCommandlineArray() {
+			jvmArgs + ["-cp", classpathString, mainClass] + launchArgs
+		}
+
 		String getJavaCommandline() {
-			"$jvmArgs $classpathArg $mainClass $launchArgs"
+			"${jvmArgs.join(" ")} $classpathArg $mainClass ${launchArgs.join(" ")}"
+		}
+
+		Process run(Path javaExecutable) {
+			def bin = [javaExecutable.toString()] as String[]
+			(bin + javaCommandlineArray).execute(null as List, minecraftDirectory.toFile())
 		}
 	}
 }
