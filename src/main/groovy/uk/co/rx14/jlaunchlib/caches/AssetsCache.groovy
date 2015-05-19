@@ -71,10 +71,10 @@ class AssetsCache extends Cache {
 			String hash = it.value.hash
 			def URL = "$Constants.MinecraftAssetsBase/${hash.substring(0, 2)}/$hash".toURL()
 			if (!objects.has(hash)) {
-				LOGGER.info "Downloading $it.key"
+				LOGGER.info "Downloading $it.key from $URL"
 				objects.preDownload(hash, URL)
 			} else {
-				LOGGER.finer "Not Downloading $hash: in cache ($URL)"
+				LOGGER.finest "Not Downloading $hash: in cache ($URL)"
 			}
 		}
 	}

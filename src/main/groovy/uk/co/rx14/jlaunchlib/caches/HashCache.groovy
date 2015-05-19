@@ -146,11 +146,14 @@ class HashCache extends Cache {
 	@Override
 	void copyFrom(Path otherCache) {
 		LOGGER.info "[$storage] Copying from $otherCache"
+		def startTime = System.nanoTime()
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
 		     .forEach { Path path ->
 		         store(path.bytes)
 		     }
+		def time = System.nanoTime() - startTime
+		LOGGER.info "[$storage] Copy finished in ${time / 1000000000}s"
 	}
 
 	/**
@@ -162,6 +165,7 @@ class HashCache extends Cache {
 	@Override
 	void copyFromTrusted(Path trustedCache) {
 		LOGGER.info "[$storage] Copying from trusted cache $trustedCache"
+		def startTime = System.nanoTime()
 		Files.walk(trustedCache)
 		     .filter(Files.&isRegularFile)
 		     .filter { !has(it.toFile().name) }
@@ -170,6 +174,9 @@ class HashCache extends Cache {
 		         destination.toFile().parentFile.mkdirs()
 		         Files.copy(path, destination)
 		     }
+		def time = System.nanoTime() - startTime
+		LOGGER.info "[$storage] Copy finished in ${time / 1000000000}s"
+
 	}
 
 	void verify(VerificationAction action) {
@@ -178,6 +185,7 @@ class HashCache extends Cache {
 			return
 		}
 		LOGGER.info "[$storage] Verifying cache"
+		def startTime = System.nanoTime()
 		Files.walk(storage)
 		     .filter(Files.&isRegularFile)
 		     .filter { DigestUtils.sha1Hex(it.bytes) != it.toFile().name }
@@ -190,6 +198,8 @@ class HashCache extends Cache {
 		                 path.toFile().delete()
 		         }
 		     }
+		def time = System.nanoTime() - startTime
+		LOGGER.info "[$storage] Verified cache in ${time / 1000000000}s"
 	}
 
 	private byte[] _download(String hash, URL URL) {
