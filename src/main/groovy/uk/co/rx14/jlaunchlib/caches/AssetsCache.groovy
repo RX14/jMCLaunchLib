@@ -65,8 +65,6 @@ class AssetsCache extends Cache {
 			new String(indexes.get("$Constants.MinecraftIndexesBase/${assetsVersion}.json".toURL()))
 		)
 
-		objects.verify(HashCache.VerificationAction.DELETE)
-
 		index.objects.each {
 			String hash = it.value.hash
 			def URL = "$Constants.MinecraftAssetsBase/${hash.substring(0, 2)}/$hash".toURL()
@@ -76,6 +74,10 @@ class AssetsCache extends Cache {
 			} else {
 				LOGGER.finest "Not Downloading $hash: in cache ($URL)"
 			}
+		}
+
+		Thread.start {
+			objects.verify(HashCache.VerificationAction.DELETE)
 		}
 	}
 
