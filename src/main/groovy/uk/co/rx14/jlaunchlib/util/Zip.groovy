@@ -42,4 +42,22 @@ class Zip {
 		LOGGER.finer "Extracted $zipFile to $outPath in ${time / 1000000000}s"
 		LOGGER.finer "Exclusions: $exclusions"
 	}
+
+	public static InputStream extractSingleFile(File zipFile, String filePath) {
+		def startTime = System.nanoTime()
+
+		def zip = new ZipFile(zipFile)
+		try {
+			for (entry in (Enumeration<ZipEntry>) zip.entries()) {
+				if (entry.name == filePath && !entry.isDirectory()) {
+					def time = System.nanoTime() - startTime
+					LOGGER.finer "Extracted $filePath from $zipFile in ${time / 1000000000}s"
+					return zip.getInputStream(entry)
+				}
+			}
+		} finally {
+			zip.close()
+		}
+		throw new FileNotFoundException("Could not find $filePath in $zipFile")
+	}
 }
