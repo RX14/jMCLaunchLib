@@ -8,6 +8,7 @@ import uk.co.rx14.jlaunchlib.auth.Credentials
 import uk.co.rx14.jlaunchlib.auth.MinecraftAuthResult
 import uk.co.rx14.jlaunchlib.auth.YggdrasilAuth
 import uk.co.rx14.jlaunchlib.caches.MinecraftCaches
+import uk.co.rx14.jlaunchlib.util.Zip
 
 import java.nio.file.FileSystems
 import java.nio.file.Path
@@ -26,13 +27,13 @@ class MCInstance {
 	MinecraftVersion minecraftVersion
 	private Supplier<Credentials> credentialsSupplier
 
-	static MCInstance create(String MCVersion, Path minecraftDirectory, Path cachesDir, Supplier<Credentials> credentialsSupplier) {
+	static MCInstance create(String MCVersion, Path MCDir, Path cachesDir, Supplier<Credentials> credentialsSupplier) {
 		def caches = MinecraftCaches.create(cachesDir)
 		def instance = new MCInstance(
 			caches: caches,
 			minecraftVersion: new MinecraftVersion(MCVersion, caches.versions),
 			credentialsSupplier: credentialsSupplier,
-			minecraftDirectory: minecraftDirectory
+			minecraftDirectory: MCDir
 		)
 
 		LOGGER.fine "Created $instance"
@@ -40,8 +41,32 @@ class MCInstance {
 		instance
 	}
 
-	static MCInstance create(String MCVersion, String minecraftDirectory, String cachesDir, Supplier<Credentials> credentialsSupplier) {
-		create(MCVersion, FileSystems.default.getPath(minecraftDirectory), FileSystems.default.getPath(cachesDir), credentialsSupplier)
+	static MCInstance create(String MCVersion, String MCDir, String cachesDir, Supplier<Credentials> credentialsSupplier) {
+		create(MCVersion, FileSystems.default.getPath(MCDir), FileSystems.default.getPath(cachesDir), credentialsSupplier)
+	}
+
+	static MCInstance createForge(String MCVersion, String forgeVersion, Path MCDir, Path cachesDir, Supplier<Credentials> credentialsSupplier) {
+		def caches = MinecraftCaches.create(cachesDir)
+
+		def forgeJson = Zip.extractSingleFile(
+			caches.libs.resolve("net.minecraftforge:forge:jar:universal:$forgeVersion", "http://files.minecraftforge.net/maven/"),
+			"version.json"
+		)
+
+		def instance = new MCInstance(
+			caches: caches,
+			minecraftVersion: new MinecraftVersion(MCVersion, caches.versions, forgeJson.text),
+			credentialsSupplier: credentialsSupplier,
+			minecraftDirectory: MCDir
+		)
+
+		LOGGER.fine "Created $instance"
+
+		instance
+	}
+
+	static MCInstance createForge(String MCVersion, String forgeVersion, String MCDir, String cachesDir, Supplier<Credentials> credentialsSupplier) {
+		createForge(MCVersion, forgeVersion, FileSystems.default.getPath(MCDir), FileSystems.default.getPath(cachesDir), credentialsSupplier)
 	}
 
 	LaunchSpec getOfflineLaunchSpec(String username) {
@@ -87,8 +112,8 @@ class MCInstance {
 		}
 
 		getting "Minecraft Jar", {
-			caches.versions.get(minecraftVersion.downloadUrl)
-			spec.classpath.add(caches.versions.getPath(minecraftVersion.downloadUrl).toFile())
+			caches.versions.get(minecraftVersion.jarDownloadUrl)
+			spec.classpath.add(caches.versions.getPath(minecraftVersion.jarDownloadUrl).toFile())
 		}
 
 		getting "Minecraft Assets", {

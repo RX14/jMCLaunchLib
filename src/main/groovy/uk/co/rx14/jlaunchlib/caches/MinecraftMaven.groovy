@@ -1,5 +1,6 @@
 package uk.co.rx14.jlaunchlib.caches
 
+import org.jboss.shrinkwrap.resolver.api.NoResolvedResultException
 import org.jboss.shrinkwrap.resolver.api.maven.ConfigurableMavenResolverSystem
 import org.jboss.shrinkwrap.resolver.api.maven.Maven
 import uk.co.rx14.jlaunchlib.Constants
@@ -27,6 +28,27 @@ class MinecraftMaven {
 	File resolve(String identifier) {
 		LOGGER.fine "Resolving dependency: $identifier"
 		RESOLVER.resolve(identifier).withoutTransitivity().asSingleFile()
+	}
+
+	File resolve(String identifier, String repo) {
+		LOGGER.fine "Resolving dependency: $identifier"
+		try {
+			RESOLVER.withRemoteRepo("temp-repo", repo, "default").resolve(identifier).withoutTransitivity().asSingleFile()
+		} catch (NoResolvedResultException ignored) {
+			String[] parts = identifier.split(":")
+			switch (parts.length) {
+				case 5:
+					def classifier = parts[3]
+				case 4:
+					def ext = parts[2]
+				case 3:
+					def group = parts[0]
+					def artifact = parts[1]
+					def version = parts[parts.length - 1]
+
+					//Download Manually
+			}
+		}
 	}
 
 	File[] getLibs(MinecraftVersion version, Path nativesDirectory) {
