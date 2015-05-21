@@ -25,15 +25,7 @@ abstract class Cache {
 	 */
 	void copyFrom(Path otherCache) {
 		LOGGER.info "Copying $otherCache to $storage"
-		Files.walk(otherCache)
-		     .filter(Files.&isRegularFile)
-		     .forEach { Path path ->
-		         try {
-			         def destination = storage.resolve(otherCache.relativize(path))
-			         destination.toFile().parentFile.mkdirs()
-			         Files.copy(path, destination)
-		         } catch (FileAlreadyExistsException ignored) {} //Leave it
-		     }
+		_copyImpl(otherCache)
 	}
 
 	/**
@@ -47,6 +39,18 @@ abstract class Cache {
 	 */
 	void copyFromTrusted(Path trustedCache) {
 		LOGGER.info "Copying trusted cache $trustedCache to $storage"
-		copyFrom(trustedCache)
+		_copyImpl(trustedCache)
+	}
+
+	private void _copyImpl(Path otherCache) {
+		Files.walk(otherCache)
+		     .filter(Files.&isRegularFile)
+		     .forEach { Path path ->
+		         try {
+			         def destination = storage.resolve(otherCache.relativize(path))
+			         destination.toFile().parentFile.mkdirs()
+			         Files.copy(path, destination)
+		         } catch (FileAlreadyExistsException ignored) {} //Leave it
+		}
 	}
 }
