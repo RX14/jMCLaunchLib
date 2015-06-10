@@ -24,7 +24,7 @@ class MinecraftCaches extends Cache {
 		def cache = new MinecraftCaches(
 			storage: storage,
 			assets: AssetsCache.create(storage.resolve("assets")),
-			libs: new MinecraftMaven(),
+			libs: new MinecraftMaven(storage.resolve("libs")),
 			versions: new EtagCache(storage.resolve("versions")),
 			natives: storage.resolve("natives")
 		)

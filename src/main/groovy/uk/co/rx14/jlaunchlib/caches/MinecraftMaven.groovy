@@ -1,54 +1,48 @@
 package uk.co.rx14.jlaunchlib.caches
 
-import org.jboss.shrinkwrap.resolver.api.NoResolvedResultException
-import org.jboss.shrinkwrap.resolver.api.maven.ConfigurableMavenResolverSystem
-import org.jboss.shrinkwrap.resolver.api.maven.Maven
+import groovy.transform.Immutable
+import groovy.transform.ToString
 import uk.co.rx14.jlaunchlib.Constants
 import uk.co.rx14.jlaunchlib.MinecraftVersion
-import uk.co.rx14.jlaunchlib.util.Minecraft
 import uk.co.rx14.jlaunchlib.util.OS
+import uk.co.rx14.jlaunchlib.util.Strings
 import uk.co.rx14.jlaunchlib.util.Zip
 
 import java.nio.file.Path
 import java.util.logging.Logger
 import java.util.stream.Collectors
 
-class MinecraftMaven {
+@Immutable(knownImmutableClasses = [Path.class])
+@ToString(includePackage = false, includeNames = true)
+class MinecraftMaven extends Cache {
 
 	private final static Logger LOGGER = Logger.getLogger(MinecraftMaven.class.name)
 
-	private final static ConfigurableMavenResolverSystem RESOLVER =
-		Maven.configureResolver()
-		     .withClassPathResolution(false)
-		     .withMavenCentralRepo(true)
-		     .withRemoteRepo("minecraft-local", Minecraft.minecraftDirectory.resolve("libraries").toUri().toString(), "default")
-		     .withRemoteRepo("minecraft-libs", Constants.MinecraftLibsBase, "default")
-
-
-	File resolve(String identifier) {
-		LOGGER.fine "Resolving dependency: $identifier"
-		RESOLVER.resolve(identifier).withoutTransitivity().asSingleFile()
-	}
+	Path storage
 
 	File resolve(String identifier, String repo) {
-		LOGGER.fine "Resolving dependency: $identifier"
-		try {
-			RESOLVER.withRemoteRepo("temp-repo", repo, "default").resolve(identifier).withoutTransitivity().asSingleFile()
-		} catch (NoResolvedResultException ignored) {
-			String[] parts = identifier.split(":")
-			switch (parts.length) {
-				case 5:
-					def classifier = parts[3]
-				case 4:
-					def ext = parts[2]
-				case 3:
-					def group = parts[0]
-					def artifact = parts[1]
-					def version = parts[parts.length - 1]
+		resolve(MavenIdentifier.of(identifier), repo)
+	}
 
-					//Download Manually
+	File resolve(MavenIdentifier id, String repo) {
+		LOGGER.finer "Resolving dependency: $id.identifier in repo $repo"
+
+		def localPath = storage.resolve(id.path)
+
+		if (!localPath.exists()) {
+
+			if (!repo.endsWith("/")) {
+				repo += "/"
 			}
+
+			def artifactURL = "$repo$id.path".toURL()
+			localPath.parentMkdirs()
+
+			LOGGER.info "Downloading $artifactURL"
+			localPath.bytes = artifactURL.bytes
 		}
+
+		localPath.toFile()
 	}
 
 	File[] getLibs(MinecraftVersion version, Path nativesDirectory) {
@@ -57,28 +51,29 @@ class MinecraftMaven {
 		                         .collect(Collectors.toList())
 
 		passedLibs.collect { lib ->
-			String specifier = lib.name
+			MavenIdentifier id = MavenIdentifier.of(lib.name)
+
+			String repo = lib.url ? lib.url : Constants.MinecraftLibsBase
+
 			if (lib.natives) {
-				def (String G, String A, String V) = specifier.split(":")
-				String C
 				lib.natives.each { Map.Entry entry ->
 					if (OS.fromString(entry.key) == OS.CURRENT) {
-						C = entry.value.replace('${arch}', System.getProperty("sun.arch.data.model"))
+						id = id.copyWith(classifier: entry.value.replace('${arch}', System.getProperty("sun.arch.data.model")))
 					}
 				}
-				def file = resolve("$G:$A:jar:$C:$V")
-				if (lib.extract) {
-					LOGGER.info "Extracting $file to natives directory $nativesDirectory"
-					Zip.extractWithExclude(file, nativesDirectory, lib.extract.exclude)
-				}
-				file
-			} else {
-				resolve(specifier)
 			}
+
+			def file = resolve(id, repo)
+
+			if (lib.extract) {
+				LOGGER.info "Extracting $file to natives directory $nativesDirectory"
+				Zip.extractWithExclude(file, nativesDirectory, lib.extract.exclude)
+			}
+			file
 		}
 	}
 
-	def parseRules = { lib ->
+	private static parseRules = { lib ->
 		if (lib.rules) {
 			def download = false
 			lib.rules.each { rule ->
@@ -99,5 +94,70 @@ class MinecraftMaven {
 			LOGGER.fine "${download ? "Allowed" : "Disallowed"} $lib.name $lib"
 			download
 		} else true
+	}
+
+	@Immutable(copyWith = true)
+	@ToString(includePackage = false, includeNames = true)
+	static class MavenIdentifier {
+		String group, artifact, version, classifier, ext
+
+		String getGroupPath() {
+			group.replaceAll("\\.", "/")
+		}
+
+		String getArtifactPath() {
+			"$groupPath/$artifact"
+		}
+
+		String getVersionPath() {
+			"$artifactPath/$version"
+		}
+
+		String getFilename() {
+			def classifier = Strings.isEmpty(this.classifier) ? "" : "-${this.classifier}"
+			"$artifact-$version$classifier.$ext"
+		}
+
+		String getPath() {
+			"$versionPath/$filename"
+		}
+
+		String getIdentifier() {
+			"$group:$artifact${Strings.isEmpty(ext) ? "" : ":$ext"}${Strings.isEmpty(classifier) ? "" : ":$classifier"}:$version"
+		}
+
+		static MavenIdentifier of(String identifier) {
+			String[] parts = identifier.split(":")
+
+			String group, artifact, version
+			def classifier = ""
+			def ext = "jar"
+
+			switch (parts.length) {
+				case 5:
+					classifier = parts[3]
+				case 4:
+					ext = parts[2]
+				case 3:
+					group = parts[0]
+					artifact = parts[1]
+					version = parts[parts.length - 1]
+					break
+				default:
+					throw new IllegalArgumentException("Failed to parse Maven identifier $identifier: wrong length")
+			}
+
+			def mavenIdentifier = new MavenIdentifier(
+				group: group,
+				artifact: artifact,
+				version: version,
+				ext: ext,
+				classifier: classifier
+			)
+
+			LOGGER.finest "Parsed MavenIdentifier $identifier as $mavenIdentifier"
+
+			mavenIdentifier
+		}
 	}
 }
