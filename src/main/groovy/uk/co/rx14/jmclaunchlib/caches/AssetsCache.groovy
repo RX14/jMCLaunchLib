@@ -1,12 +1,12 @@
-package uk.co.rx14.jlaunchlib.caches
+package uk.co.rx14.jmclaunchlib.caches
 
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import groovy.transform.ToString
 import groovy.transform.TypeCheckingMode
-import uk.co.rx14.jlaunchlib.Constants
-import uk.co.rx14.jlaunchlib.MinecraftVersion
+import uk.co.rx14.jmclaunchlib.Constants
+import uk.co.rx14.jmclaunchlib.MinecraftVersion
 
 import java.nio.file.Path
 import java.util.logging.Logger

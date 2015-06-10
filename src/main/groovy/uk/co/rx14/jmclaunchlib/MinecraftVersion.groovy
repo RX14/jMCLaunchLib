@@ -1,7 +1,7 @@
-package uk.co.rx14.jlaunchlib
+package uk.co.rx14.jmclaunchlib
 
 import groovy.json.JsonSlurper
-import uk.co.rx14.jlaunchlib.caches.EtagCache
+import uk.co.rx14.jmclaunchlib.caches.EtagCache
 
 import java.util.logging.Logger
 

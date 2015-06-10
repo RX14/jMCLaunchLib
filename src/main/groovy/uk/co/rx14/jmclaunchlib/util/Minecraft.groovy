@@ -1,4 +1,4 @@
-package uk.co.rx14.jlaunchlib.util
+package uk.co.rx14.jmclaunchlib.util
 
 import groovy.transform.CompileStatic
 

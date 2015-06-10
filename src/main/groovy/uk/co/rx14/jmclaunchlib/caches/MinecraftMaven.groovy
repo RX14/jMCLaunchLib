@@ -1,15 +1,15 @@
-package uk.co.rx14.jlaunchlib.caches
+package uk.co.rx14.jmclaunchlib.caches
 
 import groovy.transform.Immutable
 import groovy.transform.ToString
 import org.apache.commons.io.IOUtils
 import org.apache.commons.io.input.BoundedInputStream
 import org.tukaani.xz.XZInputStream
-import uk.co.rx14.jlaunchlib.Constants
-import uk.co.rx14.jlaunchlib.MinecraftVersion
-import uk.co.rx14.jlaunchlib.util.OS
-import uk.co.rx14.jlaunchlib.util.Strings
-import uk.co.rx14.jlaunchlib.util.Zip
+import uk.co.rx14.jmclaunchlib.Constants
+import uk.co.rx14.jmclaunchlib.MinecraftVersion
+import uk.co.rx14.jmclaunchlib.util.OS
+import uk.co.rx14.jmclaunchlib.util.Strings
+import uk.co.rx14.jmclaunchlib.util.Zip
 
 import java.nio.file.Path
 import java.util.jar.JarEntry

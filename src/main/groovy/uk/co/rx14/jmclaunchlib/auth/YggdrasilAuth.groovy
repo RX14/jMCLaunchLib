@@ -1,15 +1,15 @@
-package uk.co.rx14.jlaunchlib.auth
+package uk.co.rx14.jmclaunchlib.auth
 
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import uk.co.rx14.jlaunchlib.exceptions.ForbiddenOperationException
+import uk.co.rx14.jmclaunchlib.exceptions.ForbiddenOperationException
 
 import java.util.function.Supplier
 import java.util.logging.Logger
 
-import static uk.co.rx14.jlaunchlib.auth.MinecraftAuthResult.Profile
+import static uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult.Profile
 
 public class YggdrasilAuth implements MinecraftAuth {
 

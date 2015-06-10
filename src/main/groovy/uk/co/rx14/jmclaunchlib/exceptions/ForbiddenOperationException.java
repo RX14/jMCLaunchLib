@@ -1,4 +1,4 @@
-package uk.co.rx14.jlaunchlib.exceptions;
+package uk.co.rx14.jmclaunchlib.exceptions;
 
 public class ForbiddenOperationException extends RuntimeException {
     public ForbiddenOperationException() {

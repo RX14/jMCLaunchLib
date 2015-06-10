@@ -1,14 +1,14 @@
-package uk.co.rx14.jlaunchlib
+package uk.co.rx14.jmclaunchlib
 
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import groovy.transform.ToString
 import groovy.transform.TypeCheckingMode
-import uk.co.rx14.jlaunchlib.auth.Credentials
-import uk.co.rx14.jlaunchlib.auth.MinecraftAuthResult
-import uk.co.rx14.jlaunchlib.auth.YggdrasilAuth
-import uk.co.rx14.jlaunchlib.caches.MinecraftCaches
-import uk.co.rx14.jlaunchlib.util.Zip
+import uk.co.rx14.jmclaunchlib.auth.Credentials
+import uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult
+import uk.co.rx14.jmclaunchlib.auth.YggdrasilAuth
+import uk.co.rx14.jmclaunchlib.caches.MinecraftCaches
+import uk.co.rx14.jmclaunchlib.util.Zip
 
 import java.nio.file.FileSystems
 import java.nio.file.Path

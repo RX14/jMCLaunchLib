@@ -1,4 +1,4 @@
-package uk.co.rx14.jlaunchlib.auth;
+package uk.co.rx14.jmclaunchlib.auth;
 
 import java.util.function.Supplier;
 
@@ -10,7 +10,7 @@ public interface MinecraftAuth {
 	 * @param credentialsSupplier The provider of the credentials to
 	 * authenticate with.
 	 * @return the authentication result to use in the minecraft arguments.
-	 * @throws uk.co.rx14.jlaunchlib.exceptions.ForbiddenOperationException when
+	 * @throws uk.co.rx14.jmclaunchlib.exceptions.ForbiddenOperationException when
 	 * the credentials are invalid.
 	 * @throws IllegalArgumentException when something is null.
 	 */

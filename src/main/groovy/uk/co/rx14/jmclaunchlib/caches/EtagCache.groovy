@@ -1,7 +1,6 @@
-package uk.co.rx14.jlaunchlib.caches
+package uk.co.rx14.jmclaunchlib.caches
 
 import com.mashape.unirest.http.Unirest
-import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import groovy.transform.ToString
 

@@ -1,4 +1,4 @@
-package uk.co.rx14.jlaunchlib.caches
+package uk.co.rx14.jmclaunchlib.caches
 
 import groovy.transform.CompileStatic
 

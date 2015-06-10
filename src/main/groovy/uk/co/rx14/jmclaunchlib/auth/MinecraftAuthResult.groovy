@@ -1,4 +1,4 @@
-package uk.co.rx14.jlaunchlib.auth
+package uk.co.rx14.jmclaunchlib.auth
 
 import groovy.transform.Immutable
 
