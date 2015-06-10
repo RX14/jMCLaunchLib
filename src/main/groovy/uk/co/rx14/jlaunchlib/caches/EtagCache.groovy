@@ -55,7 +55,7 @@ class EtagCache extends Cache {
 			LOGGER.fine "Etag was ${response.headers.getFirst("etag")}"
 			etagPath.text = response.headers.getFirst("etag")
 			filePath.bytes = response.body.bytes
-			response.body.bytes
+			filePath.bytes
 		} else {
 			LOGGER.warning "$URL returned $response.status in ${time / 1000000000}s: error"
 			throw new HTTPException(response.status)
