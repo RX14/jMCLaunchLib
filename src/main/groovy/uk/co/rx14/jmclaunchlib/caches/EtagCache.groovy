@@ -17,17 +17,17 @@ class EtagCache extends Cache {
 	Path storage
 
 	String getLocalEtag(URL URL) {
-		def path = getEtagPath(URL)
+		def path = getEtagPath(URL).toFile()
 		path.exists() ? path.text : null
 	}
 
 	byte[] get(URL URL) {
 		LOGGER.fine "Getting $URL"
 
-		def filePath = getPath(URL)
-		def etagPath = getEtagPath(URL)
+		def filePath = getPath(URL).toFile()
+		def etagPath = getEtagPath(URL).toFile()
 
-		filePath.parentMkdirs()
+		filePath.parentFile.mkdirs()
 
 		if (etagPath.exists() && !filePath.exists()) {
 			LOGGER.info "Etag file $etagPath exists but file $filePath does not: Deleting etag file."

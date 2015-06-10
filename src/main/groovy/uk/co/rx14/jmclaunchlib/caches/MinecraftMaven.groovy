@@ -33,13 +33,13 @@ class MinecraftMaven extends Cache {
 	File resolve(MavenIdentifier id, String repo) {
 		LOGGER.finer "Resolving dependency: $id.identifier in repo $repo"
 
-		def localPath = storage.resolve(id.path)
+		def localPath = storage.resolve(id.path).toFile()
 
 		//Check if non pack.xz file exists
 		if (id.ext.endsWith(".pack.xz")) {
-			Path jarPath = storage.resolve(id.copyWith(ext: id.ext.replaceAll('\\.pack\\.xz$', "")).path)
+			def jarPath = storage.resolve(id.copyWith(ext: id.ext.replaceAll('\\.pack\\.xz$', "")).path).toFile()
 			if (jarPath.exists()) {
-				return jarPath.toFile()
+				return jarPath
 			}
 		}
 
@@ -50,13 +50,13 @@ class MinecraftMaven extends Cache {
 			}
 
 			def artifactURL = "$repo$id.path".toURL()
-			localPath.parentMkdirs()
+			localPath.parentFile.mkdirs()
 
 			LOGGER.info "Downloading $artifactURL"
 			localPath.bytes = artifactURL.bytes
 		}
 
-		localPath.toFile()
+		localPath
 	}
 
 	File[] getLibs(MinecraftVersion version, Path nativesDirectory) {
