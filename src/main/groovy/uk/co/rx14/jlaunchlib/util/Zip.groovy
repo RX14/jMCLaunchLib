@@ -43,7 +43,7 @@ class Zip {
 		LOGGER.finer "Exclusions: $exclusions"
 	}
 
-	public static InputStream extractSingleFile(File zipFile, String filePath) {
+	public static byte[] extractSingleFile(File zipFile, String filePath) {
 		def startTime = System.nanoTime()
 
 		def zip = new ZipFile(zipFile)
@@ -52,7 +52,7 @@ class Zip {
 				if (entry.name == filePath && !entry.isDirectory()) {
 					def time = System.nanoTime() - startTime
 					LOGGER.finer "Extracted $filePath from $zipFile in ${time / 1000000000}s"
-					return zip.getInputStream(entry)
+					return zip.getInputStream(entry).bytes
 				}
 			}
 		} finally {

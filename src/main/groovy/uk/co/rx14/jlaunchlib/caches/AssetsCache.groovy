@@ -51,8 +51,8 @@ class AssetsCache extends Cache {
 
 	@CompileStatic(TypeCheckingMode.SKIP)
 	Path getAssets(MinecraftVersion version) {
-		if (version.get().assets) {
-			_getAssets(version.get().assets)
+		if (version.assets) {
+			_getAssets(version.assets)
 			storage
 		} else {
 			_getLegacyAssets(version.version)

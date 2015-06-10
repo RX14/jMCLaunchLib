@@ -55,7 +55,7 @@ class MCInstance {
 
 		def instance = new MCInstance(
 			caches: caches,
-			minecraftVersion: new MinecraftVersion(MCVersion, caches.versions, forgeJson.text),
+			minecraftVersion: new MinecraftVersion(MCVersion, caches.versions, new String(forgeJson)),
 			credentialsSupplier: credentialsSupplier,
 			minecraftDirectory: MCDir
 		)
@@ -124,19 +124,19 @@ class MCInstance {
 
 		spec.jvmArgs = ["-Djava.library.path=${caches.natives.resolve(minecraftVersion.version).toAbsolutePath()}"].toArray()
 
-		spec.mainClass = minecraftVersion.get().mainClass
+		spec.mainClass = minecraftVersion.mainClass
 	}
 
 	@CompileStatic(TypeCheckingMode.SKIP)
 	private String[] getArgs(LaunchSpec spec) {
-		String args = minecraftVersion.get().minecraftArguments
+		String args = minecraftVersion.minecraftArguments
 
 		args = args.replace('${auth_player_name}', spec.auth.selectedProfile.name)
 		args = args.replace('${version_name}', minecraftVersion.version)
 		args = args.replace('${game_directory}', "${minecraftDirectory.toAbsolutePath()}")
 		args = args.replace('${game_assets}', "${spec.assetsPath.toAbsolutePath()}")
 		args = args.replace('${assets_root}', "${caches.assets.storage.toAbsolutePath()}")
-		args = args.replace('${assets_index_name}', minecraftVersion.get().assets)
+		args = args.replace('${assets_index_name}', minecraftVersion.assets)
 		args = args.replace('${user_properties}', "{}")
 		args = args.replace('--userType ${user_type}', "")
 		args = args.replace('${auth_uuid}', spec.auth.clientToken)

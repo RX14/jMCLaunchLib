@@ -12,13 +12,13 @@ class MinecraftVersion {
 
 	final String version
 	final EtagCache versionCache
-	final private versionJson
+	final private Map json
 
 	MinecraftVersion(String minecraftVersion, EtagCache versionCache, String versionJson) {
 		this.version = minecraftVersion
 		this.versionCache = versionCache
 
-		this.versionJson = applyParent(
+		this.json = applyParent(
 			new JsonSlurper().parseText(
 				versionJson
 			)
@@ -33,26 +33,34 @@ class MinecraftVersion {
 		this(version, versionCache, "$Constants.MinecraftVersionsBase/$version/${version}.json".toURL())
 	}
 
-	def get() {
-		versionJson
-	}
-
 	List getLibs() {
-		get().libraries
+		json.libraries.clone()
 	}
 
 	URL getJarDownloadUrl() {
 		"$Constants.MinecraftVersionsBase/$version/${version}.jar".toURL()
 	}
 
-	private applyParent(versionJson) {
+	String getAssets() {
+		json.assets
+	}
+
+	String getMinecraftArguments() {
+		json.minecraftArguments
+	}
+
+	String getMainClass() {
+		json.mainClass
+	}
+
+	private Map applyParent(versionJson) {
 		if (versionJson.inheritsFrom) {
-			LOGGER.info "[$version] Loading parent json $versionJson.inheritsFrom"
+			LOGGER.info "[$versionJson.id] Loading parent json $versionJson.inheritsFrom"
 
 			def parent = new MinecraftVersion(versionJson.inheritsFrom, versionCache)
-			versionJson.libs << parent.get().libs
+			versionJson.libraries.addAll(parent.libs)
 
-			parent + versionJson
+			parent.json + versionJson
 		} else {
 			versionJson
 		}
