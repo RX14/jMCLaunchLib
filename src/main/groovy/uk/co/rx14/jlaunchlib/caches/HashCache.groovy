@@ -5,6 +5,8 @@ import groovy.transform.Immutable
 import groovy.transform.ToString
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.HttpClients
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -203,7 +205,7 @@ class HashCache extends Cache {
 	}
 
 	private byte[] _download(String hash, URL URL) {
-		byte[] data = URL.bytes
+		byte[] data = HttpClients.createDefault().execute(new HttpGet(URL.toURI())).entity.content.bytes
 
 		String downloadedHash = store(data)
 
