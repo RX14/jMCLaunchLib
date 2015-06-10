@@ -12,6 +12,8 @@ dependencies {
 	compile "org.codehaus.groovy:groovy-all:2.4.3"
 	compile "com.mashape.unirest:unirest-java:1.4.5"
 	compile "commons-codec:commons-codec:1.10"
+	compile "org.tukaani:xz:1.5"
+	compile "commons-io:commons-io:2.4"
 }
 
 publishing {

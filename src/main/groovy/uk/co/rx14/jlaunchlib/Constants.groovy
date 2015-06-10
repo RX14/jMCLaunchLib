@@ -9,4 +9,6 @@ class Constants {
 	public static final String MinecraftIndexesBase = "$MinecraftDownload/indexes"
 	public static final String MinecraftAssetsBase = "http://resources.download.minecraft.net"
 	public static final String MinecraftLibsBase = "https://libraries.minecraft.net/"
+
+	public static final String[] XZLibs = ["org.scala-lang", "com.typesafe"]
 }
