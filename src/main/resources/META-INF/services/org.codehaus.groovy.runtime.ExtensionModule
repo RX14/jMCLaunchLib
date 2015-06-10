@@ -1,0 +1,3 @@
+moduleName=path-module
+moduleVersion=1.0.0
+extensionClasses=uk.co.rx14.jlaunchlib.util.PathExtension

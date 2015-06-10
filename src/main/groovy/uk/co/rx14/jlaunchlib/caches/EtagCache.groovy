@@ -9,7 +9,6 @@ import javax.xml.ws.http.HTTPException
 import java.nio.file.Path
 import java.util.logging.Logger
 
-@CompileStatic
 @ToString(includePackage = false, includeNames = true)
 @Immutable(knownImmutableClasses = [Path.class])
 class EtagCache extends Cache {
@@ -19,9 +18,8 @@ class EtagCache extends Cache {
 	Path storage
 
 	String getLocalEtag(URL URL) {
-		def etagFile = getEtagPath(URL).toFile()
-
-		etagFile.exists() ? etagFile.text : null
+		def path = getEtagPath(URL)
+		path.exists() ? path.text : null
 	}
 
 	byte[] get(URL URL) {
@@ -30,11 +28,11 @@ class EtagCache extends Cache {
 		def filePath = getPath(URL)
 		def etagPath = getEtagPath(URL)
 
-		filePath.toFile().parentFile.mkdirs()
+		filePath.parentMkdirs()
 
-		if (etagPath.toFile().exists() && !filePath.toFile().exists()) {
+		if (etagPath.exists() && !filePath.exists()) {
 			LOGGER.info "Etag file $etagPath exists but file $filePath does not: Deleting etag file."
-			etagPath.toFile().delete()
+			etagPath.delete()
 		}
 
 		def localEtag = getLocalEtag(URL)
