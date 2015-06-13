@@ -8,6 +8,7 @@ import uk.co.rx14.jmclaunchlib.auth.Credentials
 import uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult
 import uk.co.rx14.jmclaunchlib.auth.YggdrasilAuth
 import uk.co.rx14.jmclaunchlib.caches.MinecraftCaches
+import uk.co.rx14.jmclaunchlib.util.Strings
 import uk.co.rx14.jmclaunchlib.util.Zip
 
 import java.nio.file.FileSystems
@@ -129,21 +130,32 @@ class MCInstance {
 
 	@CompileStatic(TypeCheckingMode.SKIP)
 	private String[] getArgs(LaunchSpec spec) {
-		String args = minecraftVersion.minecraftArguments
+		def args = minecraftVersion.minecraftArguments.split(" ")
 
-		args = args.replace('${auth_player_name}', spec.auth.selectedProfile.name)
-		args = args.replace('${version_name}', minecraftVersion.version)
-		args = args.replace('${game_directory}', "${minecraftDirectory.toAbsolutePath()}")
-		args = args.replace('${game_assets}', "${spec.assetsPath.toAbsolutePath()}")
-		args = args.replace('${assets_root}', "${caches.assets.storage.toAbsolutePath()}")
-		args = args.replace('${assets_index_name}', minecraftVersion.assets)
-		args = args.replace('${user_properties}', "{}")
-		args = args.replace('--userType ${user_type}', "")
-		args = args.replace('${auth_uuid}', spec.auth.clientToken)
-		args = args.replace('${auth_access_token}', spec.auth.accessToken)
-		args = args.replace('${auth_session}', spec.auth.accessToken)
+		args = args.collect { arg ->
+			arg.replace('${auth_player_name}', spec.auth.selectedProfile.name)
+			   .replace('${version_name}', minecraftVersion.version)
+			   .replace('${game_directory}', "${minecraftDirectory.toAbsolutePath()}")
+			   .replace('${game_assets}', "${spec.assetsPath.toAbsolutePath()}")
+			   .replace('${assets_root}', "${caches.assets.storage.toAbsolutePath()}")
+			   .replace('${assets_index_name}', minecraftVersion.assets)
+			   .replace('${user_properties}', "{}")
+			   .replace('${auth_uuid}', spec.auth.clientToken)
+			   .replace('${auth_access_token}', spec.auth.accessToken)
+			   .replace('${auth_session}', spec.auth.accessToken)
+		}
 
-		args.split(" ")
+		//If the argument flag value is empty remove the flag (set it to empty string as a marker value)
+		args = args.eachWithIndex { arg, i ->
+			if (Strings.isEmpty(arg) || arg == '${user_type}') {
+				args[i - 1] = ""
+			}
+		}
+
+		//Filter out the empty strings in the args
+		args.findAll {
+			Strings.isNotEmpty(it) && it != '${user_type}'
+		}
 	}
 
 	private static getting(String name, Closure closure) {
