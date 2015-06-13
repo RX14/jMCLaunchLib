@@ -76,7 +76,7 @@ class MCInstance {
 		spec.offline = true
 
 		spec.auth = new MinecraftAuthResult(
-			accessToken: '',
+			accessToken: 'fakeAccessToken',
 			clientToken: '',
 			valid: true,
 			selectedProfile: new MinecraftAuthResult.Profile(
