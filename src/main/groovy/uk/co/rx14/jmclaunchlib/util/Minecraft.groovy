@@ -18,18 +18,24 @@ final class Minecraft {
 	{
 		String userDir = System.getProperty("user.home")
 
+		def file
 		switch (OS.CURRENT)
 		{
 			case OS.LINUX:
-				return new File(userDir, ".minecraft").toPath()
+				file = new File(userDir, ".minecraft")
+				break
 			case OS.WINDOWS:
 				String appData = System.getenv("APPDATA")
 				String folder = appData != null ? appData : userDir
-				return new File(folder, ".minecraft").toPath()
+				file = new File(folder, ".minecraft")
+				break
 			case OS.OSX:
-				return new File(userDir, "Library/Application Support/minecraft").toPath()
+				file = new File(userDir, "Library/Application Support/minecraft")
+				break
 			default:
-				return new File(userDir, "minecraft").toPath()
+				file = new File(userDir, "minecraft")
+				break
 		}
+		file.toPath().toAbsolutePath()
 	}
 }
