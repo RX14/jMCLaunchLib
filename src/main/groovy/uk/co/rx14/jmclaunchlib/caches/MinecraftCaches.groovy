@@ -7,6 +7,8 @@ import groovy.transform.ToString
 import java.nio.file.Path
 import java.util.logging.Logger
 
+import static uk.co.rx14.jmclaunchlib.util.Minecraft.minecraftDirectory
+
 @CompileStatic
 @ToString(includePackage = false, includeNames = true)
 @Immutable(knownImmutableClasses = [Path.class, MinecraftMaven.class])
@@ -31,6 +33,8 @@ class MinecraftCaches extends Cache {
 
 		LOGGER.fine "Created $cache"
 
+		cache.copyFromMinecraftDirectory()
+
 		cache
 	}
 
@@ -48,5 +52,15 @@ class MinecraftCaches extends Cache {
 		assets.copyFromTrusted(trustedCache.resolve(storage.relativize(assets.storage)))
 		versions.copyFromTrusted(trustedCache.resolve(storage.relativize(versions.storage)))
 		libs.copyFromTrusted(trustedCache.resolve(storage.relativize(libs.storage)))
+	}
+
+	void copyFromMinecraftDirectory() {
+		def marker = storage.resolve("hasCopiedMinecraftDirectory")
+		if (marker.toFile().exists()) return
+
+		libs.copyFrom(minecraftDirectory.resolve("libraries"))
+		assets.copyFrom(minecraftDirectory.resolve("assets"))
+
+		marker.toFile().createNewFile()
 	}
 }
