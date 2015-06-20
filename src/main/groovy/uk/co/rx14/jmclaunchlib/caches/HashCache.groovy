@@ -192,7 +192,7 @@ class HashCache extends Cache {
 		     .filter(Files.&isRegularFile)
 		     .filter { DigestUtils.sha1Hex(it.bytes) != it.toFile().name }
 		     .forEach { Path path ->
-		         LOGGER.warning "[$storage] File $path did not match expected hash: ${action == VerificationAction.DELETE ? "deleting" : "rehashing"} file."
+		         LOGGER.warning "[$storage] File $path did not match expected hash: ${action.action} file."
 		         switch (action) {
 		             case VerificationAction.REHASH:
 		                 store(path.bytes)
@@ -240,6 +240,12 @@ class HashCache extends Cache {
 	}
 
 	enum VerificationAction {
-		REHASH, DELETE
+		REHASH("rehashing"), DELETE("deleting")
+
+		String action
+
+		VerificationAction(String action) {
+			this.action = action
+		}
 	}
 }
