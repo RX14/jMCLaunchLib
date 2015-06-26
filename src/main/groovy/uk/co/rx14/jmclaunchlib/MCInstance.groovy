@@ -140,7 +140,7 @@ class MCInstance {
 			   .replace('${assets_root}', "${caches.assets.storage.toAbsolutePath()}")
 			   .replace('${assets_index_name}', minecraftVersion.assets)
 			   .replace('${user_properties}', "{}")
-			   .replace('${auth_uuid}', spec.auth.clientToken)
+			   .replace('${auth_uuid}', spec.auth.selectedProfile.id)
 			   .replace('${auth_access_token}', spec.auth.accessToken)
 			   .replace('${auth_session}', spec.auth.accessToken)
 		}
