@@ -55,8 +55,8 @@ class MinecraftCaches extends Cache {
 	}
 
 	void copyFromMinecraftDirectory() {
-		def marker = storage.resolve("hasCopiedMinecraftDirectory")
-		if (marker.toFile().exists()) return
+		def marker = storage.resolve("hasCopiedMinecraftDirectory").toFile()
+		if (marker.exists()) return
 
 
 		def libsPath = minecraftDirectory.resolve("libraries")
@@ -65,6 +65,7 @@ class MinecraftCaches extends Cache {
 		def assetsPath = minecraftDirectory.resolve("assets")
 		if (assetsPath.toFile().isDirectory()) assets.copyFrom(assetsPath)
 
-		marker.toFile().createNewFile()
+		marker.parentFile.mkdirs()
+		marker.createNewFile()
 	}
 }
