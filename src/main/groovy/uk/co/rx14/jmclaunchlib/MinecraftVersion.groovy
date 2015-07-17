@@ -55,7 +55,7 @@ class MinecraftVersion {
 
 	private Map applyParent(versionJson) {
 		if (versionJson.inheritsFrom) {
-			LOGGER.info "[$versionJson.id] Loading parent json $versionJson.inheritsFrom"
+			LOGGER.fine "[$versionJson.id] Loading parent json $versionJson.inheritsFrom"
 
 			def parent = new MinecraftVersion(versionJson.inheritsFrom, versionCache)
 			versionJson.libraries.addAll(parent.libs)

@@ -95,7 +95,7 @@ class MCInstance {
 
 		spec.offline = false
 
-		LOGGER.info "Logging in..."
+		LOGGER.fine "Logging in..."
 		spec.auth = new YggdrasilAuth().auth(credentialsSupplier)
 
 		_commonTasks(spec)
@@ -159,11 +159,11 @@ class MCInstance {
 	}
 
 	private static getting(String name, Closure closure) {
-		LOGGER.info "Getting $name"
+		LOGGER.fine "Getting $name"
 		def startTime = System.nanoTime()
 		closure.call()
 		def time = System.nanoTime() - startTime
-		LOGGER.info "Got $name in ${time / 1000000000}s"
+		LOGGER.fine "Got $name in ${time / 1000000000}s"
 	}
 
 	static class LaunchSpec {

@@ -52,7 +52,7 @@ class MinecraftMaven extends Cache {
 			def artifactURL = "$repo$id.path".toURL()
 			localPath.parentFile.mkdirs()
 
-			LOGGER.info "Downloading $artifactURL"
+			LOGGER.fine "Downloading $artifactURL"
 			localPath.bytes = artifactURL.bytes
 		}
 
@@ -102,7 +102,7 @@ class MinecraftMaven extends Cache {
 			}
 
 			if (lib.extract) {
-				LOGGER.info "Extracting $file to natives directory $nativesDirectory"
+				LOGGER.fine "Extracting $file to natives directory $nativesDirectory"
 				Zip.extractWithExclude(file, nativesDirectory, lib.extract.exclude)
 			}
 
@@ -111,7 +111,7 @@ class MinecraftMaven extends Cache {
 	}
 
 	private void extractPackXz(File pack, File jar) {
-		LOGGER.info "Extracting pack $pack"
+		LOGGER.fine "Extracting pack $pack"
 
 		def packFile = new File(pack.path.replaceFirst('\\.xz$', ""))
 

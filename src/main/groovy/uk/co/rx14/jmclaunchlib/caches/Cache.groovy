@@ -24,7 +24,7 @@ abstract class Cache {
 	 * @param otherCache the path to the cache to copy
 	 */
 	void copyFrom(Path otherCache) {
-		LOGGER.info "Copying $otherCache to $storage"
+		LOGGER.fine "Copying $otherCache to $storage"
 		_copyImpl(otherCache)
 	}
 
@@ -38,7 +38,7 @@ abstract class Cache {
 	 * @param trustedCache the path to the cache to copy
 	 */
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.info "Copying trusted cache $trustedCache to $storage"
+		LOGGER.fine "Copying trusted cache $trustedCache to $storage"
 		_copyImpl(trustedCache)
 	}
 

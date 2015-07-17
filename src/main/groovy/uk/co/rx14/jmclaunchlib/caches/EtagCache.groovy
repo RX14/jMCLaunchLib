@@ -30,7 +30,7 @@ class EtagCache extends Cache {
 		filePath.parentFile.mkdirs()
 
 		if (etagPath.exists() && !filePath.exists()) {
-			LOGGER.info "Etag file $etagPath exists but file $filePath does not: Deleting etag file."
+			LOGGER.fine "Etag file $etagPath exists but file $filePath does not: Deleting etag file."
 			etagPath.delete()
 		}
 
@@ -47,10 +47,10 @@ class EtagCache extends Cache {
 		def time = System.nanoTime() - startTime
 
 		if (response.status == 304) { //Return from cache
-			LOGGER.info "$URL returned 304 in ${time / 1000000000}s: using cache"
+			LOGGER.fine "$URL returned 304 in ${time / 1000000000}s: using cache"
 			filePath.bytes
 		} else if (response.status == 200) { //Return from response
-			LOGGER.info "$URL returned 200 in ${time / 1000000000}s: caching"
+			LOGGER.fine "$URL returned 200 in ${time / 1000000000}s: caching"
 			LOGGER.fine "Etag was ${response.headers.getFirst("etag")}"
 			etagPath.text = response.headers.getFirst("etag")
 			filePath.bytes = response.body.bytes

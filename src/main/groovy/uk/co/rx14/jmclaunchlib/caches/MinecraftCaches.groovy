@@ -40,7 +40,7 @@ class MinecraftCaches extends Cache {
 
 	@Override
 	void copyFrom(Path otherCache) {
-		LOGGER.info "Copying $otherCache to $storage"
+		LOGGER.fine "Copying $otherCache to $storage"
 		assets.copyFrom(otherCache.resolve(storage.relativize(assets.storage)))
 		versions.copyFrom(otherCache.resolve(storage.relativize(versions.storage)))
 		libs.copyFrom(otherCache.resolve(storage.relativize(libs.storage)))
@@ -48,7 +48,7 @@ class MinecraftCaches extends Cache {
 
 	@Override
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.info "Copying trusted cache $trustedCache to $storage"
+		LOGGER.fine "Copying trusted cache $trustedCache to $storage"
 		assets.copyFromTrusted(trustedCache.resolve(storage.relativize(assets.storage)))
 		versions.copyFromTrusted(trustedCache.resolve(storage.relativize(versions.storage)))
 		libs.copyFromTrusted(trustedCache.resolve(storage.relativize(libs.storage)))

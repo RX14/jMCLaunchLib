@@ -147,7 +147,7 @@ class HashCache extends Cache {
 	 */
 	@Override
 	void copyFrom(Path otherCache) {
-		LOGGER.info "[$storage] Copying from $otherCache"
+		LOGGER.fine "[$storage] Copying from $otherCache"
 		def startTime = System.nanoTime()
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
@@ -155,7 +155,7 @@ class HashCache extends Cache {
 		         store(path.bytes)
 		     }
 		def time = System.nanoTime() - startTime
-		LOGGER.info "[$storage] Copy finished in ${time / 1000000000}s"
+		LOGGER.fine "[$storage] Copy finished in ${time / 1000000000}s"
 	}
 
 	/**
@@ -166,7 +166,7 @@ class HashCache extends Cache {
 	 */
 	@Override
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.info "[$storage] Copying from trusted cache $trustedCache"
+		LOGGER.fine "[$storage] Copying from trusted cache $trustedCache"
 		def startTime = System.nanoTime()
 		Files.walk(trustedCache)
 		     .filter(Files.&isRegularFile)
@@ -177,16 +177,16 @@ class HashCache extends Cache {
 		         Files.copy(path, destination)
 		     }
 		def time = System.nanoTime() - startTime
-		LOGGER.info "[$storage] Copy finished in ${time / 1000000000}s"
+		LOGGER.fine "[$storage] Copy finished in ${time / 1000000000}s"
 
 	}
 
 	void verify(VerificationAction action) {
 		if (!storage.toFile().exists()) {
-			LOGGER.info "[$storage] Not verifying cache: storage does not exist"
+			LOGGER.fine "[$storage] Not verifying cache: storage does not exist"
 			return
 		}
-		LOGGER.info "[$storage] Verifying cache"
+		LOGGER.fine "[$storage] Verifying cache"
 		def startTime = System.nanoTime()
 		Files.walk(storage)
 		     .filter(Files.&isRegularFile)
@@ -201,7 +201,7 @@ class HashCache extends Cache {
 		         }
 		     }
 		def time = System.nanoTime() - startTime
-		LOGGER.info "[$storage] Verified cache in ${time / 1000000000}s"
+		LOGGER.fine "[$storage] Verified cache in ${time / 1000000000}s"
 	}
 
 	private byte[] _download(String hash, URL URL) {

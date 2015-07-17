@@ -11,7 +11,7 @@ final class Minecraft {
 	public static final Path minecraftDirectory = _getMinecraftDirectory()
 
 	static {
-		Logger.getLogger(Minecraft.class.name).info "Detected minecraft directory: $minecraftDirectory"
+		Logger.getLogger(Minecraft.class.name).fine "Detected minecraft directory: $minecraftDirectory"
 	}
 
 	private static Path _getMinecraftDirectory()

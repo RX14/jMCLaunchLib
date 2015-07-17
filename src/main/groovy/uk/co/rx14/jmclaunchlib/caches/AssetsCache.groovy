@@ -69,7 +69,7 @@ class AssetsCache extends Cache {
 			String hash = it.value.hash
 			def URL = "$Constants.MinecraftAssetsBase/${hash.substring(0, 2)}/$hash".toURL()
 			if (!objects.has(hash)) {
-				LOGGER.info "Downloading $it.key from $URL"
+				LOGGER.fine "Downloading $it.key from $URL"
 				objects.preDownload(hash, URL)
 			} else {
 				LOGGER.finest "Not Downloading $hash: in cache ($URL)"
@@ -95,7 +95,7 @@ class AssetsCache extends Cache {
 	 */
 	@Override
 	void copyFrom(Path otherCache) {
-		LOGGER.info "Copying cache $otherCache to $storage"
+		LOGGER.fine "Copying cache $otherCache to $storage"
 		objects.copyFrom(otherCache.resolve(storage.relativize(objects.storage)))
 		indexes.copyFrom(otherCache.resolve(storage.relativize(indexes.storage)))
 	}
@@ -111,7 +111,7 @@ class AssetsCache extends Cache {
 	 */
 	@Override
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.info "Copying trusted cache $trustedCache to $storage"
+		LOGGER.fine "Copying trusted cache $trustedCache to $storage"
 
 		objects.copyFromTrusted(trustedCache.resolve(storage.relativize(objects.storage)))
 		indexes.copyFromTrusted(trustedCache.resolve(storage.relativize(indexes.storage)))

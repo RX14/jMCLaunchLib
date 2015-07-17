@@ -17,7 +17,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 
 	@Override
 	MinecraftAuthResult auth(Supplier<Credentials> provider) {
-		LOGGER.info "Starting Minecraft authentication"
+		LOGGER.fine "Starting Minecraft authentication"
 		if (!provider) throw new IllegalArgumentException("CredentialsProvider is null")
 		Credentials credentials = provider.get();
 		if (!credentials) throw new IllegalArgumentException("Credentials are null")
@@ -42,7 +42,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 			}
 		}
 
-		LOGGER.info "Authenticated successfully"
+		LOGGER.fine "Authenticated successfully"
 
 		new MinecraftAuthResult(
 			accessToken: res.accessToken,
@@ -57,7 +57,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 
 	@Override
 	MinecraftAuthResult refresh(MinecraftAuthResult previous) {
-		LOGGER.info "Starting Minecraft token refresh"
+		LOGGER.fine "Starting Minecraft token refresh"
 		if (!previous.valid) throw new IllegalArgumentException("MinecraftAuthResult is not valid")
 
 		def res = request("refresh", [
@@ -86,7 +86,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 			}
 		}
 
-		LOGGER.info "Refreshed token successfully"
+		LOGGER.fine "Refreshed token successfully"
 
 		new MinecraftAuthResult(
 			accessToken: res.accessToken,
