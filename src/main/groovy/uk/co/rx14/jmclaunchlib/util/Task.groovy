@@ -36,7 +36,7 @@ trait Task {
 	private boolean done
 
 	void start() {
-		if (!started.compareAndSet(false, true)) return
+		if (!started.compareAndSet(false, true)) return //Only one thread may progress past here
 
 		LOGGER.fine "$description: started"
 		def startTime = System.nanoTime()
