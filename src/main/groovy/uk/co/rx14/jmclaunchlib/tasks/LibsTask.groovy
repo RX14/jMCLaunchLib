@@ -19,6 +19,7 @@ class LibsTask implements Task {
 
 	final int weight = 0
 	private List<Task> subtasks = [].asImmutable()
+	final String description = "Download Libraries"
 
 	MinecraftMaven mavenCache
 	MinecraftVersion version
@@ -47,11 +48,13 @@ class LibsTask implements Task {
 	class LibTask implements Task {
 		int weight = 0
 		final List<Task> subtasks = [].asImmutable()
+		final String description
 
 		def lib
 
 		LibTask(lib) {
 			this.lib = lib
+			this.description = "Download $lib.name"
 		}
 
 		@Override

@@ -12,6 +12,7 @@ class LoginTask implements Task {
 
 	final int weight
 	List<Task> subtasks = [].asImmutable()
+	final String description = "Log in"
 
 	String username
 	PasswordSupplier passwordSupplier

@@ -16,6 +16,7 @@ class LaunchTask implements Task {
 
 	final int weight = 1
 	private List<Task> subtasks = new CopyOnWriteArrayList<>()
+	final String description = "Prepare to launch Minecraft"
 
 	LaunchSpec spec
 

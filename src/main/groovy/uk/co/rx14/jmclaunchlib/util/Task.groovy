@@ -19,8 +19,15 @@ trait Task {
 	private static final Logger LOGGER = Logger.getLogger(Task.class.getName())
 
 	abstract List<Task> getSubtasks()
-
 	abstract int getWeight()
+
+	/**
+	 * Description should be in in imperative present tense, e.g.
+	 * "Download example.txt" instead of "Downloading example.txt"
+	 *
+	 * @return the description of this task
+	 */
+	abstract String getDescription()
 
 	abstract void before()
 	abstract void after()
@@ -31,18 +38,20 @@ trait Task {
 	void start() {
 		if (!started.compareAndSet(false, true)) return
 
-		LOGGER.finer "[${Thread.currentThread().name}] ${getClass()}::before enter"
+		LOGGER.fine "$description: started"
+		def startTime = System.nanoTime()
 		before()
-		LOGGER.finer "[${Thread.currentThread().name}] ${getClass()}::before exit"
+		LOGGER.finest "[${Thread.currentThread().name}] ${getClass()}::before exit"
 
 		if (subtasks.size() > 0 ) {
 			LOGGER.finest "[${Thread.currentThread().name}] ${getClass()} starting in parallel: $subtasks"
 			subtasks.parallelStream().forEach { it.start() }
 		}
 
-		LOGGER.finer "[${Thread.currentThread().name}] ${getClass()}::after enter"
+		LOGGER.finest "[${Thread.currentThread().name}] ${getClass()}::after enter"
 		after()
-		LOGGER.finer "[${Thread.currentThread().name}] ${getClass()}::after exit"
+		def time = System.nanoTime() - startTime
+		LOGGER.fine "$description: finished in ${time / 1000000000}s"
 
 		done = true
 	}

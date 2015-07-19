@@ -8,6 +8,7 @@ import uk.co.rx14.jmclaunchlib.util.Task
 class MinecraftJarTask implements Task {
 	final int weight = 5
 	final List<Task> subtasks = [].asImmutable()
+	final String description = "Download minecraft.jar"
 
 	EtagCache versionCache
 	MinecraftVersion minecraftVersion

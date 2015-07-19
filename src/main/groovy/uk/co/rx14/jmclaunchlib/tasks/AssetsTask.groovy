@@ -13,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class AssetsTask implements Task {
 	final int weight = 5
 	private final List<Task> _subtasks = new CopyOnWriteArrayList<>()
+	final String description = "Download assets listing"
 
 	MinecraftVersion minecraftVersion
 	AssetsCache cache
@@ -32,10 +33,8 @@ class AssetsTask implements Task {
 			)
 
 			index.objects.each {
-				String hash = it.value.hash
-				def URL = "$Constants.MinecraftAssetsBase/${hash.substring(0, 2)}/$hash".toURL()
-				if (!cache.objects.has(hash)) {
-					_subtasks << new AssetDownloadTask(hash, URL)
+				if (!cache.objects.has(it.value.hash)) {
+					_subtasks << new AssetDownloadTask(it)
 				}
 			}
 
@@ -55,13 +54,13 @@ class AssetsTask implements Task {
 	class AssetDownloadTask implements Task {
 		final int weight = 5
 		final List<Task> subtasks = [].asImmutable()
+		final String description
 
-		String hash
-		URL URL
+		def asset
 
-		AssetDownloadTask(String hash, URL URL) {
-			this.hash = hash
-			this.URL = URL
+		AssetDownloadTask(asset) {
+			this.asset = asset
+			this.description = "Download $asset.key"
 		}
 
 		@Override
@@ -69,6 +68,8 @@ class AssetsTask implements Task {
 
 		@Override
 		void after() {
+			String hash = asset.value.hash
+			def URL = "$Constants.MinecraftAssetsBase/${hash.substring(0, 2)}/$hash".toURL()
 			cache.objects.preDownload(hash, URL)
 		}
 	}
