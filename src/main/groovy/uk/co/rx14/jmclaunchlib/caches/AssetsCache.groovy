@@ -1,12 +1,8 @@
 package uk.co.rx14.jmclaunchlib.caches
 
-import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import groovy.transform.ToString
-import groovy.transform.TypeCheckingMode
-import uk.co.rx14.jmclaunchlib.Constants
-import uk.co.rx14.jmclaunchlib.MinecraftVersion
 
 import java.nio.file.Path
 import java.util.logging.Logger
@@ -47,42 +43,6 @@ class AssetsCache extends Cache {
 		others.each(cache.&copyFromTrusted)
 
 		cache
-	}
-
-	@CompileStatic(TypeCheckingMode.SKIP)
-	Path getAssets(MinecraftVersion version) {
-		if (version.assets) {
-			_getAssets(version.assets)
-			storage
-		} else {
-			_getLegacyAssets(version.version)
-		}
-	}
-
-	@CompileStatic(TypeCheckingMode.SKIP)
-	private void _getAssets(String assetsVersion) {
-		def index = new JsonSlurper().parseText(
-			new String(indexes.get("$Constants.MinecraftIndexesBase/${assetsVersion}.json".toURL()))
-		)
-
-		index.objects.each {
-			String hash = it.value.hash
-			def URL = "$Constants.MinecraftAssetsBase/${hash.substring(0, 2)}/$hash".toURL()
-			if (!objects.has(hash)) {
-				LOGGER.fine "Downloading $it.key from $URL"
-				objects.preDownload(hash, URL)
-			} else {
-				LOGGER.finest "Not Downloading $hash: in cache ($URL)"
-			}
-		}
-
-		Thread.start {
-			objects.verify(HashCache.VerificationAction.DELETE)
-		}
-	}
-
-	private Path _getLegacyAssets(String minecraftVersion) {
-		throw new UnsupportedOperationException("Legacy assets not supported... for now :3")
 	}
 
 	/**

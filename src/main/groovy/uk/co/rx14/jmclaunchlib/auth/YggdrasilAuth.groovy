@@ -6,7 +6,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import uk.co.rx14.jmclaunchlib.exceptions.ForbiddenOperationException
 
-import java.util.function.Supplier
 import java.util.logging.Logger
 
 import static uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult.Profile
@@ -16,19 +15,18 @@ public class YggdrasilAuth implements MinecraftAuth {
 	private final static Logger LOGGER = Logger.getLogger(YggdrasilAuth.class.name)
 
 	@Override
-	MinecraftAuthResult auth(Supplier<Credentials> provider) {
+	MinecraftAuthResult auth(String username, String password) {
 		LOGGER.fine "Starting Minecraft authentication"
-		if (!provider) throw new IllegalArgumentException("CredentialsProvider is null")
-		Credentials credentials = provider.get();
-		if (!credentials) throw new IllegalArgumentException("Credentials are null")
+		if (!username) throw new IllegalArgumentException("Username is null")
+		if (!password) throw new IllegalArgumentException("Password is null")
 
 		def res = request("authenticate", [
 			agent   : [
 				name   : "Minecraft",
 				version: 1
 			],
-			username: credentials.username,
-			password: credentials.password
+			username: username,
+			password: password
 		])
 
 		if (res.error) {
@@ -58,7 +56,6 @@ public class YggdrasilAuth implements MinecraftAuth {
 	@Override
 	MinecraftAuthResult refresh(MinecraftAuthResult previous) {
 		LOGGER.fine "Starting Minecraft token refresh"
-		if (!previous.valid) throw new IllegalArgumentException("MinecraftAuthResult is not valid")
 
 		def res = request("refresh", [
 			accessToken: previous.accessToken,

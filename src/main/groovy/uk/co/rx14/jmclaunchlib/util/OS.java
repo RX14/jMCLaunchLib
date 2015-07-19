@@ -5,8 +5,7 @@ import groovy.transform.CompileStatic;
 import java.util.Locale;
 
 @CompileStatic
-enum OS
-{
+public enum OS {
 	LINUX("linux", "bsd", "unix"),
 	WINDOWS("windows", "win"),
 	OSX("osx", "mac"),

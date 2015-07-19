@@ -1,18 +1,18 @@
 package uk.co.rx14.jmclaunchlib.auth
 
 import groovy.transform.Immutable
+import groovy.transform.ToString
 
-@Immutable class MinecraftAuthResult {
+@ToString(includePackage = false, includeNames = true)
+@Immutable(copyWith = true)
+class MinecraftAuthResult {
 	String accessToken, clientToken
 	Profile selectedProfile
 	boolean valid
 
-	@Override
-	String toString() {
-		"${getClass().getName()}(accessToken: $accessToken, clientToken: $clientToken, selectedProfile: $selectedProfile, valid: $valid)"
-	}
-
-	public static @Immutable class Profile {
+	@ToString(includePackage = false, includeNames = true)
+	@Immutable(copyWith = true)
+	static class Profile {
 		String name, id
 	}
 }
