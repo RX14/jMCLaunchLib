@@ -3,6 +3,8 @@ package uk.co.rx14.jmclaunchlib.util
 import groovy.transform.Canonical
 import groovy.transform.ToString
 
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Logger
 
@@ -18,6 +20,7 @@ trait Task {
 
 	private static final Logger LOGGER = Logger.getLogger(Task.class.getName())
 
+	private static final ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("jMCLaunchLib-taskpool"))
 	abstract List<Task> getSubtasks()
 	abstract int getWeight()
 
@@ -43,9 +46,11 @@ trait Task {
 		before()
 		LOGGER.finest "[${Thread.currentThread().name}] ${getClass()}::before exit"
 
-		if (subtasks.size() > 0 ) {
-			LOGGER.finest "[${Thread.currentThread().name}] ${getClass()} starting in parallel: $subtasks"
-			subtasks.parallelStream().forEach { it.start() }
+		LOGGER.finest "[${Thread.currentThread().name}] ${getClass()} starting in parallel: $subtasks"
+		subtasks.collect { task ->
+			executor.submit { task.start() }
+		}.each {
+			it.get()
 		}
 
 		LOGGER.finest "[${Thread.currentThread().name}] ${getClass()}::after enter"
