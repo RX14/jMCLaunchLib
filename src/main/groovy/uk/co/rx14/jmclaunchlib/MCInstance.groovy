@@ -66,9 +66,17 @@ class MCInstance {
 		createForge(MCVersion, forgeVersion, FileSystems.default.getPath(MCDir), FileSystems.default.getPath(cachesDir), passwordSupplier)
 	}
 
-	LaunchTask getTask(String username, boolean offline) {
+	private LaunchTask getTask(String username, boolean offline) {
 		def spec = new LaunchSpec(minecraftDirectory: minecraftDirectory, offline: offline)
 
 		new LaunchTask(spec, caches, minecraftVersion, username, passwordSupplier)
+	}
+
+	LaunchTask getOfflineLaunchTask(String username) {
+		getTask(username, true)
+	}
+
+	LaunchTask getLaunchTask(String email) {
+		getTask(email, false)
 	}
 }

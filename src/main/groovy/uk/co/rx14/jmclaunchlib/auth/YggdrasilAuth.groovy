@@ -64,12 +64,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 
 		if (res.error) {
 			if (res.error == "ForbiddenOperationException" && res.errorMessage == "Invalid token.") {
-				return new MinecraftAuthResult(
-					accessToken: previous.accessToken,
-					clientToken: previous.clientToken,
-					selectedProfile: previous.selectedProfile,
-					valid: false
-				)
+				return previous.copyWith(valid: false)
 			}
 
 			LOGGER.warning "Minecraft token refresh failed with: $res"
