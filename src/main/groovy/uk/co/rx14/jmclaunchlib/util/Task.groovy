@@ -1,6 +1,7 @@
 package uk.co.rx14.jmclaunchlib.util
 
 import groovy.transform.Canonical
+import groovy.transform.CompileStatic
 import groovy.transform.ToString
 
 import java.util.concurrent.ExecutorService
@@ -14,13 +15,15 @@ import java.util.logging.Logger
  * <p>
  * Total weight of this task is this task's weight + subtasks weight. Subtasks are counted recursively.
  */
-@Canonical
+@CompileStatic
 @ToString(includePackage = false, includeNames = true)
+@Canonical
 trait Task {
 
 	private static final Logger LOGGER = Logger.getLogger(Task.class.getName())
 
 	private static final ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("jMCLaunchLib-taskpool"))
+
 	abstract List<Task> getSubtasks()
 	abstract int getWeight()
 
@@ -35,11 +38,11 @@ trait Task {
 	abstract void before()
 	abstract void after()
 
-	private AtomicBoolean started = new AtomicBoolean()
-	private boolean done
+	private AtomicBoolean _started = new AtomicBoolean()
+	private boolean _done
 
 	void start() {
-		if (!started.compareAndSet(false, true)) return //Only one thread may progress past here
+		if (!_started.compareAndSet(false, true)) return //Only one thread may progress past here
 
 		LOGGER.fine "$description: started"
 		def startTime = System.nanoTime()
@@ -58,15 +61,15 @@ trait Task {
 		def time = System.nanoTime() - startTime
 		LOGGER.fine "$description: finished in ${time / 1000000000}s"
 
-		done = true
+		_done = true
 	}
 
 	int getTotalWeight() {
-		weight + subtasks.totalWeight.sum(0)
+		weight + (int)subtasks.totalWeight.sum(0)
 	}
 
 	int getCompletedWeight() {
-		(done ? weight : 0) + subtasks.completedWeight.sum(0)
+		(_done ? weight : 0) + (int)subtasks.completedWeight.sum(0)
 	}
 
 	double getCompletedPercentage() {
@@ -74,30 +77,31 @@ trait Task {
 	}
 
 	List<Task> getDoneTasks() {
-		def tasks = subtasks.doneTasks.flatten()
-		if (done) {
+		def tasks = subtasks.doneTasks.flatten() as List<Task>
+		if (_done) {
 			tasks += this
 		}
 		tasks
 	}
 
 	List<Task> getCurrentTasks() {
-		def tasks = subtasks.currentTasks.flatten()
-		if (started && !done) {
+		def tasks = subtasks.currentTasks.flatten() as List<Task>
+		if (_started.get() && !_done) {
 			tasks += this
 		}
 		tasks
 	}
 
 	List<Task> getRemainingTasks() {
-		def tasks = subtasks.remainingTasks.flatten()
-		if (!started && !done) {
+		def tasks = subtasks.remainingTasks.flatten() as List<Task>
+		if (!_started.get() && !_done) {
 			tasks += this
 		}
 		tasks
 	}
 
-	boolean isStarted() { started }
+	boolean isStarted() { _started.get() }
 
-	boolean isDone() { done }
+	boolean isDone() { _done }
+
 }
