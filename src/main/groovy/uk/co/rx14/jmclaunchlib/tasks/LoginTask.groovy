@@ -2,6 +2,7 @@ package uk.co.rx14.jmclaunchlib.tasks
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.json.JsonSlurperClassic
 import uk.co.rx14.jmclaunchlib.LaunchSpec
 import uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult
 import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
@@ -45,21 +46,27 @@ class LoginTask implements Task {
 				)
 			)
 		} else {
-			Map<String, MinecraftAuthResult> tokens = [:]
+			def tokens = [:]
 			if (cacheFile.exists()) {
 				try {
-					tokens = new JsonSlurper().parse(cacheFile) as Map<String, MinecraftAuthResult>
+					tokens = new JsonSlurperClassic().parse(cacheFile)
 				} catch (ClassCastException e) {
 					throw e //TODO remove this once tested
 				}
 			}
 
 			def authResult = tokens.get(username)
+			authResult.selectedProfile = authResult.selectedProfile as MinecraftAuthResult.Profile //why :(
+			authResult = authResult as MinecraftAuthResult
 
-			if (authResult) {
-				new YggdrasilAuth().refresh(authResult)
-			} else {
-				authResult = new YggdrasilAuth().auth(username, passwordSupplier.getPassword(username))
+			def auth = new YggdrasilAuth()
+			switch (authResult) {
+				case { authResult != null }:
+					authResult = auth.refresh(authResult)
+					if (authResult.valid) break
+
+				case { authResult == null }:
+					authResult = auth.auth(username, passwordSupplier.getPassword(username))
 			}
 
 			tokens.put(username, authResult)
