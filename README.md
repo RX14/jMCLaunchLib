@@ -64,7 +64,7 @@ LaunchSpec spec = task.getSpec()
 You should reuse the MCInstance object as much as possible, it can be expensive to create (also never make it on a GUI thread).
 You cannot, however, reuse Task objects.
 
-LaunchSpec is a class which contains the information you need to launch Minecraft: classpath, launch arguments, JVM arguments and the main class.
+LaunchSpec is a class which contains the information you need to launch Minecraft: classpath, program arguments for minecraft, JVM arguments and the main class.
 You can use `getLaunchArgs().add(...)` and `getJvmArgs().add(...)` to customise the launch parameters.
 Use `LaunchSpec.getJavaCommandline()` to get the arguments to pass to the Java executable as a String,
 or use `LaunchSpec.run(java.nio.file.Path javaExecutable)` to let jMCLaunchLib run Minecraft.
