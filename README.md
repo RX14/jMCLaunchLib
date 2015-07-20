@@ -1,16 +1,16 @@
 jMCLaunchLib
 ============
-A library to make minecraft launcher development with JVM languages easier by providing a library to do the hard work: actually launching minecraft.
+A library to make Minecraft launcher development with JVM languages easier by providing a library to do the hard work: actually authenticating and launching Minecraft.
 
-Although this library is written in groovy, java support **IS** a priority for me, some java-based launchers are already using it.
+Although this library is written in Groovy, Java support **IS** a priority for me, some Java-based launchers are already using it.
 
 If you require help and support see me in the #RX14 channel on EsperNet.
-**Do not hesitate to report bugs and feature requests in the github issues.**
+**Do not hesitate to report bugs and feature requests in the [Github Issues](https://github.com/RX14/jMCLaunchLib/issues).**
 Even if you decide not to use this library, please drop a note as to why so I can improve, for the good of the community.
 
 How do I get it?
 ----------------
-The library is available on the jcenter maven repository.
+The library is [available](https://bintray.com/rx14/jMCLaunchLib/jMCLaunchLib/view) on the jCenter Maven repository.
 
 Using Gradle:
 ```groovy
@@ -26,7 +26,7 @@ dependencies {
 Usage
 -----
 First step in launching Minecraft is to get a `MCInstance`.
-This class holds information like Minecraft version, where to cache data, where the minecraft directory is etc.
+This class holds information like Minecraft version, where to cache data, where the Minecraft directory is etc.
 To obtain a `MCInstance` you call the `create` or `createForge` static methods on `MCInstance`.
 
 ```java
@@ -46,7 +46,7 @@ using this interface as a callback to request the password for a specific userna
 
 Now you have your `MCInstance`, what can you do with it?
 The next step to launching Minecraft is getting the task which you will start to launch the game,
-the reason you get a Task object THEN launch it is that it allows you to monitor the launching progress from another thread and provide feedback to the user.
+the reason you get a Task object *then* launch it is that it allows you to monitor the launching progress from another thread and provide feedback to the user.
 
 ```java
 LaunchTask task = instance.getLaunchTask("user@email.address"); //Or username if not Mojang account
@@ -64,12 +64,13 @@ LaunchSpec spec = task.getSpec()
 You should reuse the MCInstance object as much as possible, it can be expensive to create (also never make it on a GUI thread).
 You cannot, however, reuse Task objects.
 
-LaunchSpec is a class which contains the information you need to launch minecraft: classpath, launchargs, jvmArgs and mainclass.
+LaunchSpec is a class which contains the information you need to launch Minecraft: classpath, launch arguments, JVM arguments and the main class.
 You can use `getLaunchArgs().add(...)` and `getJvmArgs().add(...)` to customise the launch parameters.
-Use `LaunchSpec.getJavaCommandline()` to get the arguments to pass to the java executable as a String,
+Use `LaunchSpec.getJavaCommandline()` to get the arguments to pass to the Java executable as a String,
 or use `LaunchSpec.run(java.nio.file.Path javaExecutable)` to let jMCLaunchLib run Minecraft.
-The `run()` method returns a standard java Process object so you can control minecraft and route it's standard output streams.
-If you pester me enough I might write something cool to redirect stdout/err from a Process to useful places.
+The `run()` method returns a standard Java Process object so you can control Minecraft and route it's standard output streams.
+
+(If you pester me enough I might write something cool to redirect stdout/err from a Process to useful places.)
 
 Customisation
 -------------
