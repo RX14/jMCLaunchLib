@@ -48,22 +48,20 @@ class LoginTask implements Task {
 		} else {
 			def tokens = [:]
 			if (cacheFile.exists()) {
-				try {
-					tokens = new JsonSlurperClassic().parse(cacheFile)
-				} catch (ClassCastException e) {
-					throw e //TODO remove this once tested
-				}
+				tokens = new JsonSlurperClassic().parse(cacheFile)
 			}
 
 			def authResult = tokens.get(username)
-			authResult.selectedProfile = authResult.selectedProfile as MinecraftAuthResult.Profile //why :(
-			authResult = authResult as MinecraftAuthResult
 
 			def auth = new YggdrasilAuth()
 			switch (authResult) {
 				case { authResult != null }:
-					authResult = auth.refresh(authResult)
-					if (authResult.valid) break
+					try {
+						authResult.selectedProfile = authResult.selectedProfile as MinecraftAuthResult.Profile //why :(
+						authResult = authResult as MinecraftAuthResult
+						authResult = auth.refresh(authResult)
+						if (authResult.valid) break
+					} catch (Exception ignored) {}
 
 				case { authResult == null }:
 					authResult = auth.auth(username, passwordSupplier.getPassword(username))
