@@ -2,6 +2,8 @@ plugins {
 	id "groovy"
 	id "maven-publish"
 	id "jacoco"
+	id "com.jfrog.bintray" version "1.2"
+	id "net.researchgate.release" version "2.1.2"
 }
 
 repositories {
@@ -37,6 +39,27 @@ publishing {
 		}
 	}
 }
+
+bintray {
+	publications = ["main"]
+	pkg {
+		repo = project.name
+		name = project.name
+		desc = "Launch Minecraft from the JVM. With a library."
+		licenses = ["MIT"]
+		vcsUrl = "https://github.com/RX14/jMinecraftLib"
+		issueTrackerUrl = "$vcsUrl/issues"
+		labels = ["minecraft", "groovy", "library", "launch"]
+		version {
+			name = project.version
+			released = new Date()
+			vcsTag = project.version
+			gpg.sign = true
+		}
+	}
+}
+
+afterReleaseBuild.dependsOn bintrayUpload
 
 jacocoTestReport {
 	reports {
