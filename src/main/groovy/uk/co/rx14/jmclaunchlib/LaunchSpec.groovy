@@ -1,11 +1,14 @@
 package uk.co.rx14.jmclaunchlib
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import groovy.transform.TupleConstructor
 import uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult
 
 import java.nio.file.Path
 
 @TupleConstructor
+@CompileStatic
 class LaunchSpec {
 	Path minecraftDirectory
 	Path assetsPath
@@ -35,14 +38,15 @@ class LaunchSpec {
 	}
 
 	String[] getJavaCommandlineArray() {
-		jvmArgs + ["-cp", classpathString, mainClass] + launchArgs
+		[*jvmArgs, "-cp", classpathString, mainClass, *launchArgs].toArray()
 	}
 
 	String getJavaCommandline() {
 		javaCommandlineArray.join(" ")
 	}
 
+	@CompileDynamic
 	Process run(Path javaExecutable) {
-		"$javaExecutable $javaCommandline".execute(null, getMinecraftDirectory().toFile())
+		[javaExecutable, *javaCommandlineArray].execute(null, getMinecraftDirectory().toFile())
 	}
 }
