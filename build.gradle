@@ -59,6 +59,8 @@ bintray {
 	}
 }
 
+sourceSets.main.resources { exclude "logging.properties" }
+
 afterReleaseBuild.dependsOn bintrayUpload
 
 jacocoTestReport {
