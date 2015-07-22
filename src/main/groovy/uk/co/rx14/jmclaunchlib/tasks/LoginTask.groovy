@@ -9,7 +9,11 @@ import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
 import uk.co.rx14.jmclaunchlib.auth.YggdrasilAuth
 import uk.co.rx14.jmclaunchlib.util.Task
 
+import java.util.logging.Logger
+
 class LoginTask implements Task {
+
+	private final static Logger LOGGER = Logger.getLogger(LoginTask.class.name)
 
 	final int weight
 	List<Task> subtasks = [].asImmutable()
@@ -48,7 +52,13 @@ class LoginTask implements Task {
 		} else {
 			def tokens = [:]
 			if (cacheFile.exists()) {
-				tokens = new JsonSlurperClassic().parse(cacheFile)
+				try {
+					tokens = new JsonSlurperClassic().parse(cacheFile)
+				} catch (Exception e) {
+					def sw = new StringWriter()
+					e.printStackTrace(new PrintWriter(sw))
+					LOGGER.warning("Failed to parse auth.json: $sw")
+				}
 			}
 
 			def authResult = tokens.get(username)
