@@ -1,6 +1,7 @@
 package uk.co.rx14.jmclaunchlib.util;
 
 import groovy.transform.CompileStatic;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Locale;
 
@@ -13,6 +14,10 @@ public enum OS {
 
 	private String name;
 	private String[] aliases;
+
+	static {
+		LogFactory.getLog(OS.class).debug("Detected OS " + getCURRENT() + " with version " + getVERSION());
+	}
 
 	private OS(String name, String... aliases) {
 		this.name = name;

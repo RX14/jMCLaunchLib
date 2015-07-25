@@ -1,16 +1,17 @@
 package uk.co.rx14.jmclaunchlib.caches
 
 import groovy.transform.CompileStatic
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.logging.Logger
 
 @CompileStatic
 abstract class Cache {
 
-	private final static Logger LOGGER = Logger.getLogger(Cache.class.name)
+	private final static Log LOGGER = LogFactory.getLog(Cache)
 
 	abstract Path getStorage();
 
@@ -24,7 +25,7 @@ abstract class Cache {
 	 * @param otherCache the path to the cache to copy
 	 */
 	void copyFrom(Path otherCache) {
-		LOGGER.fine "Copying $otherCache to $storage"
+		LOGGER.debug "Copying $otherCache to $storage"
 		_copyImpl(otherCache)
 	}
 
@@ -38,7 +39,7 @@ abstract class Cache {
 	 * @param trustedCache the path to the cache to copy
 	 */
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.fine "Copying trusted cache $trustedCache to $storage"
+		LOGGER.debug "Copying trusted cache $trustedCache to $storage"
 		_copyImpl(trustedCache)
 	}
 

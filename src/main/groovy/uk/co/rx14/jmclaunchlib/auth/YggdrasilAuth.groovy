@@ -4,19 +4,29 @@ import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.Unirest
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import uk.co.rx14.jmclaunchlib.exceptions.ForbiddenOperationException
-
-import java.util.logging.Logger
 
 import static uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult.Profile
 
-public class YggdrasilAuth implements MinecraftAuth {
+public class YggdrasilAuth {
 
-	private final static Logger LOGGER = Logger.getLogger(YggdrasilAuth.class.name)
+	private final static Log LOGGER = LogFactory.getLog(YggdrasilAuth)
 
-	@Override
-	MinecraftAuthResult auth(String username, String password) {
-		LOGGER.fine "Starting Minecraft authentication"
+	/**
+	 * Uses the given credentials to generate a new
+	 * {@link MinecraftAuthResult}.
+	 *
+	 * @param username the username
+	 * @param password the password
+	 * @return the authentication result to use in the minecraft arguments.
+	 * @throws uk.co.rx14.jmclaunchlib.exceptions.ForbiddenOperationException when
+	 * the credentials are invalid.
+	 * @throws IllegalArgumentException when something is null.
+	 */
+	static MinecraftAuthResult auth(String username, String password) {
+		LOGGER.trace "Starting Minecraft authentication"
 		if (!username) throw new IllegalArgumentException("Username is null")
 		if (!password) throw new IllegalArgumentException("Password is null")
 
@@ -30,17 +40,19 @@ public class YggdrasilAuth implements MinecraftAuth {
 		])
 
 		if (res.error) {
-			LOGGER.warning "Minecraft authentication failed with: $res"
+			def exception
 			if (res.error == "ForbiddenOperationException") {
-				throw new ForbiddenOperationException(res.errorMessage)
+				exception = new ForbiddenOperationException(res.errorMessage)
 			} else if (res.error == "IllegalArgumentException") {
-				throw new IllegalArgumentException(res.errorMessage)
+				exception = new IllegalArgumentException(res.errorMessage)
 			} else {
-				throw new RuntimeException(res.errorMessage)
+				exception = new RuntimeException(res.errorMessage)
 			}
+			LOGGER.warn "Minecraft authentication failed with: $res", exception
+			throw exception
 		}
 
-		LOGGER.fine "Authenticated successfully"
+		LOGGER.debug "Authenticated successfully"
 
 		new MinecraftAuthResult(
 			accessToken: res.accessToken,
@@ -53,9 +65,15 @@ public class YggdrasilAuth implements MinecraftAuth {
 		)
 	}
 
-	@Override
-	MinecraftAuthResult refresh(MinecraftAuthResult previous) {
-		LOGGER.fine "Starting Minecraft token refresh"
+	/**
+	 * Refreshes a previously-valid {@link MinecraftAuthResult}. If the
+	 * refreshing fails, it returns an auth result where valid is set to false.
+	 *
+	 * @return the {@link MinecraftAuthResult}.
+	 * @throws IllegalArgumentException when something is null.
+	 */
+	static MinecraftAuthResult refresh(MinecraftAuthResult previous) {
+		LOGGER.trace "Starting Minecraft token refresh"
 
 		def res = request("refresh", [
 			accessToken: previous.accessToken,
@@ -64,21 +82,23 @@ public class YggdrasilAuth implements MinecraftAuth {
 
 		if (res.error) {
 			if (res.error == "ForbiddenOperationException" && res.errorMessage == "Invalid token.") {
+				LOGGER.debug "Token is invalid"
 				return previous.copyWith(valid: false)
 			}
 
-			LOGGER.warning "Minecraft token refresh failed with: $res"
-
+			def exception
 			if (res.error == "ForbiddenOperationException") {
-				throw new ForbiddenOperationException((String) res.errorMessage)
+				exception = new ForbiddenOperationException((String) res.errorMessage)
 			} else if (res.error == "IllegalArgumentException") {
-				throw new IllegalArgumentException((String) res.errorMessage)
+				exception = new IllegalArgumentException((String) res.errorMessage)
 			} else {
-				throw new RuntimeException((String) res.errorMessage)
+				exception = new RuntimeException((String) res.errorMessage)
 			}
+			LOGGER.warn "Minecraft token refresh failed with: $res", exception
+			throw exception
 		}
 
-		LOGGER.fine "Refreshed token successfully"
+		LOGGER.debug "Refreshed token successfully"
 
 		new MinecraftAuthResult(
 			accessToken: res.accessToken,
@@ -91,7 +111,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 		)
 	}
 
-	def request(String path, body) {
+	private static request(String path, body) {
 		def jsonBody = JsonOutput.toJson(body)
 
 		def startTime = System.nanoTime()
@@ -102,7 +122,7 @@ public class YggdrasilAuth implements MinecraftAuth {
 			       .asString();
 
 		def time = System.nanoTime() - startTime
-		LOGGER.fine "Completed $path request in ${time / 1000000000}s"
+		LOGGER.trace "Completed $path request in ${time / 1000000000}s"
 
 		new JsonSlurper().parseText(response.body)
 	}

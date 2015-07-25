@@ -3,16 +3,17 @@ package uk.co.rx14.jmclaunchlib.caches
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import groovy.transform.ToString
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 import java.nio.file.Path
-import java.util.logging.Logger
 
 @CompileStatic
 @ToString(includePackage = false, includeNames = true)
 @Immutable(knownImmutableClasses = [Path.class])
 class AssetsCache extends Cache {
 
-	private final static Logger LOGGER = Logger.getLogger(AssetsCache.class.name)
+	private final static Log LOGGER = LogFactory.getLog(AssetsCache)
 
 	Path storage
 	HashCache objects
@@ -28,7 +29,6 @@ class AssetsCache extends Cache {
 	 * @return
 	 */
 	static AssetsCache create(Path storage, Path... others) {
-		storage = storage.toAbsolutePath()
 		def objectsCache = new HashCache(storage.resolve("objects"))
 		def indexesCache = new EtagCache(storage.resolve("indexes"))
 
@@ -38,7 +38,7 @@ class AssetsCache extends Cache {
 			indexes: indexesCache
 		)
 
-		LOGGER.fine "Created $cache"
+		LOGGER.trace "Created $cache"
 
 		others.each(cache.&copyFromTrusted)
 
@@ -55,7 +55,7 @@ class AssetsCache extends Cache {
 	 */
 	@Override
 	void copyFrom(Path otherCache) {
-		LOGGER.fine "Copying cache $otherCache to $storage"
+		LOGGER.trace "Copying cache $otherCache to $storage"
 		objects.copyFrom(otherCache.resolve(storage.relativize(objects.storage)))
 		indexes.copyFrom(otherCache.resolve(storage.relativize(indexes.storage)))
 	}
@@ -71,7 +71,7 @@ class AssetsCache extends Cache {
 	 */
 	@Override
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.fine "Copying trusted cache $trustedCache to $storage"
+		LOGGER.trace "Copying trusted cache $trustedCache to $storage"
 
 		objects.copyFromTrusted(trustedCache.resolve(storage.relativize(objects.storage)))
 		indexes.copyFromTrusted(trustedCache.resolve(storage.relativize(indexes.storage)))

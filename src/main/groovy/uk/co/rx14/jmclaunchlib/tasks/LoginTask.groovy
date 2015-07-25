@@ -1,19 +1,18 @@
 package uk.co.rx14.jmclaunchlib.tasks
 
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import groovy.json.JsonSlurperClassic
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import uk.co.rx14.jmclaunchlib.LaunchSpec
 import uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult
 import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
 import uk.co.rx14.jmclaunchlib.auth.YggdrasilAuth
 import uk.co.rx14.jmclaunchlib.util.Task
 
-import java.util.logging.Logger
-
 class LoginTask implements Task {
 
-	private final static Logger LOGGER = Logger.getLogger(LoginTask.class.name)
+	private final static Log LOGGER = LogFactory.getLog(LoginTask)
 
 	final int weight
 	List<Task> subtasks = [].asImmutable()
@@ -35,7 +34,7 @@ class LoginTask implements Task {
 	}
 
 	@Override
-	void before() { }
+	void before() {}
 
 	@Override
 	void after() {
@@ -55,26 +54,23 @@ class LoginTask implements Task {
 				try {
 					tokens = new JsonSlurperClassic().parse(cacheFile)
 				} catch (Exception e) {
-					def sw = new StringWriter()
-					e.printStackTrace(new PrintWriter(sw))
-					LOGGER.warning("Failed to parse auth.json: $sw")
+					LOGGER.warn "Failed to parse auth.json", e
 				}
 			}
 
 			def authResult = tokens.get(username)
 
-			def auth = new YggdrasilAuth()
 			switch (authResult) {
 				case { authResult != null }:
 					try {
 						authResult.selectedProfile = authResult.selectedProfile as MinecraftAuthResult.Profile //why :(
 						authResult = authResult as MinecraftAuthResult
-						authResult = auth.refresh(authResult)
+						authResult = YggdrasilAuth.refresh(authResult)
 						if (authResult.valid) break
 					} catch (Exception ignored) {}
 
 				case { authResult == null }:
-					authResult = auth.auth(username, passwordSupplier.getPassword(username))
+					authResult = YggdrasilAuth.auth(username, passwordSupplier.getPassword(username))
 			}
 
 			tokens.put(username, authResult)

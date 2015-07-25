@@ -2,14 +2,14 @@ package uk.co.rx14.jmclaunchlib.util
 
 import groovy.transform.Immutable
 import groovy.transform.ToString
-
-import java.util.logging.Logger
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 @Immutable(copyWith = true)
 @ToString(includePackage = false, includeNames = true)
 class MavenIdentifier {
 
-	private final static Logger LOGGER = Logger.getLogger(MavenIdentifier.class.name)
+	private final static Log LOGGER = LogFactory.getLog(MavenIdentifier)
 
 	String group, artifact, version, classifier, ext
 
@@ -56,7 +56,9 @@ class MavenIdentifier {
 				version = parts[parts.length - 1]
 				break
 			default:
-				throw new IllegalArgumentException("Failed to parse Maven identifier $identifier: wrong length")
+				def e = new IllegalArgumentException("Failed to parse Maven identifier $identifier: wrong length")
+				LOGGER.debug "", e
+				throw e
 		}
 
 		def mavenIdentifier = new MavenIdentifier(
@@ -67,7 +69,7 @@ class MavenIdentifier {
 			classifier: classifier
 		)
 
-		LOGGER.finest "Parsed MavenIdentifier $identifier as $mavenIdentifier"
+		LOGGER.trace "Parsed MavenIdentifier $identifier as $mavenIdentifier"
 
 		mavenIdentifier
 	}

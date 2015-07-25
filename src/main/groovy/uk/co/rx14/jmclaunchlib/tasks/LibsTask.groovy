@@ -1,5 +1,7 @@
 package uk.co.rx14.jmclaunchlib.tasks
 
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import uk.co.rx14.jmclaunchlib.Constants
 import uk.co.rx14.jmclaunchlib.LaunchSpec
 import uk.co.rx14.jmclaunchlib.MinecraftVersion
@@ -10,12 +12,11 @@ import uk.co.rx14.jmclaunchlib.util.OS
 import uk.co.rx14.jmclaunchlib.util.Task
 
 import java.nio.file.Path
-import java.util.logging.Logger
 import java.util.stream.Collectors
 
 class LibsTask implements Task {
 
-	private final static Logger LOGGER = Logger.getLogger(LibsTask.class.name)
+	private final static Log LOGGER = LogFactory.getLog(LibsTask)
 
 	final int weight = 0
 	private List<Task> subtasks = [].asImmutable()
@@ -36,9 +37,9 @@ class LibsTask implements Task {
 	@Override
 	void before() {
 		subtasks = version.libs.stream()
-		                       .filter(parseRules)
-		                       .map { new LibTask(it) }
-		                       .collect(Collectors.toList())
+		                  .filter(parseRules)
+		                  .map { new LibTask(it) }
+		                  .collect(Collectors.toList())
 		                       .asImmutable()
 	}
 
@@ -77,7 +78,7 @@ class LibsTask implements Task {
 			}
 
 			Constants.XZLibs.each { XZGroup ->
-				if (id.group.startsWith(XZGroup)) {
+				if (id.group ==~ XZGroup) {
 					id = id.copyWith(ext: "jar.pack.xz")
 				}
 			}
@@ -105,8 +106,8 @@ class LibsTask implements Task {
 				file = jarFile
 			}
 
+			//TODO split to extract task
 			if (lib.extract) {
-				LOGGER.fine "Extracting $file to natives directory $nativesDirectory"
 				Compression.extractZipWithExclude(file, nativesDirectory, lib.extract.exclude)
 			}
 
@@ -120,21 +121,21 @@ class LibsTask implements Task {
 		if (lib.rules) {
 			def download = false
 			lib.rules.each { rule ->
-				LOGGER.finest "Currently ${download ? "allowing" : "disallowing"} $lib.name"
+				LOGGER.trace "Currently ${download ? "allowing" : "disallowing"} $lib.name"
 				if (rule.os) {
 					if (OS.fromString(rule.os.name) == OS.CURRENT) {
-						LOGGER.finest "Rule OS '$rule.os.name' matched '$OS.CURRENT'"
-						LOGGER.finest "Applying rule action $rule.action"
+						LOGGER.trace "Rule OS '$rule.os.name' matched '$OS.CURRENT'"
+						LOGGER.trace "Applying rule action $rule.action"
 						download = rule.action == "allow"
 					} else {
-						LOGGER.finest "Rule OS '$rule.os.name' did not match '$OS.CURRENT'"
+						LOGGER.trace "Rule OS '$rule.os.name' did not match '$OS.CURRENT'"
 					}
 				} else {
-					LOGGER.finest "Applying rule action $rule.action"
+					LOGGER.trace "Applying rule action $rule.action"
 					download = rule.action == "allow"
 				}
 			}
-			LOGGER.fine "${download ? "Allowed" : "Disallowed"} $lib.name $lib"
+			LOGGER.trace "${download ? "Allowed" : "Disallowed"} $lib.name $lib"
 			download
 		} else true
 	}

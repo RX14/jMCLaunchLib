@@ -3,6 +3,8 @@ package uk.co.rx14.jmclaunchlib
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import groovy.transform.ToString
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
 import uk.co.rx14.jmclaunchlib.caches.MinecraftCaches
 import uk.co.rx14.jmclaunchlib.tasks.LaunchTask
@@ -17,7 +19,7 @@ import java.util.logging.Logger
 @Immutable(knownImmutableClasses = [Path.class, MinecraftVersion.class])
 class MCInstance {
 
-	private static final Logger LOGGER = Logger.getLogger(MCInstance.class.getName())
+	private static final Log LOGGER = LogFactory.getLog(MCInstance)
 
 	Path minecraftDirectory
 	MinecraftCaches caches
@@ -31,9 +33,9 @@ class MCInstance {
 			minecraftVersion: new MinecraftVersion(MCVersion, caches.versions),
 			passwordSupplier: passwordSupplier,
 			minecraftDirectory: MCDir,
-		)
+			)
 
-		LOGGER.fine "Created $instance"
+		LOGGER.trace "Created $instance"
 
 		instance
 	}
@@ -57,7 +59,7 @@ class MCInstance {
 			minecraftDirectory: MCDir
 		)
 
-		LOGGER.fine "Created $instance"
+		LOGGER.trace "Created $instance"
 
 		instance
 	}

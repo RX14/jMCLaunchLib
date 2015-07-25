@@ -1,9 +1,9 @@
 package uk.co.rx14.jmclaunchlib.util
 
 import groovy.transform.CompileStatic
+import org.apache.commons.logging.LogFactory
 
 import java.nio.file.Path
-import java.util.logging.Logger
 
 @CompileStatic
 final class Minecraft {
@@ -11,7 +11,7 @@ final class Minecraft {
 	public static final Path minecraftDirectory = _getMinecraftDirectory()
 
 	static {
-		Logger.getLogger(Minecraft.class.name).fine "Detected minecraft directory: $minecraftDirectory"
+		LogFactory.getLog(Minecraft.class).debug "Detected minecraft directory: $minecraftDirectory"
 	}
 
 	private static Path _getMinecraftDirectory()

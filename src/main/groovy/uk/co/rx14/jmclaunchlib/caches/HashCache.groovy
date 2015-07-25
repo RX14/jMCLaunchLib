@@ -5,12 +5,13 @@ import groovy.transform.Immutable
 import groovy.transform.ToString
 import groovy.transform.TypeCheckingMode
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.logging.Logger
 
 /**
  * Implements a hash-addressed filesystem cache.
@@ -23,7 +24,7 @@ import java.util.logging.Logger
 @Immutable(knownImmutableClasses = [Path.class])
 class HashCache extends Cache {
 
-	private final static Logger LOGGER = Logger.getLogger(HashCache.class.name)
+	private final static Log LOGGER = LogFactory.getLog(HashCache)
 
 	Path storage
 
@@ -39,11 +40,11 @@ class HashCache extends Cache {
 
 
 		if (!file.exists()) {
-			LOGGER.finest "[$storage] Storing $hash in $file"
+			LOGGER.trace "[$storage] Storing $hash in $file"
 			file.parentFile.mkdirs()
 			file.bytes = data
 		} else {
-			LOGGER.finest "[$storage] Not storing $hash in $file: already exists"
+			LOGGER.trace "[$storage] Not storing $hash in $file: already exists"
 		}
 
 		hash
@@ -60,11 +61,10 @@ class HashCache extends Cache {
 		def file = getPath(hash).toFile()
 
 		if (file.exists()) {
-			LOGGER.finer "[$storage] Got $hash"
+			LOGGER.trace "[$storage] Got $hash from cache"
 			file.bytes
-		}
-		else {
-			LOGGER.finer "[$storage] Not getting $hash: doesn't exist"
+		} else {
+			LOGGER.trace "[$storage] Not getting $hash from cache: doesn't exist"
 			null
 		}
 	}
@@ -102,7 +102,8 @@ class HashCache extends Cache {
 	 */
 	@CompileStatic(TypeCheckingMode.SKIP)
 	DataHashPair download(URL URL) {
-		LOGGER.fine "[$storage] Downloading $URL"
+		LOGGER.info "Downloading $URL"
+		LOGGER.trace "[$storage] Downloading $URL"
 		byte[] data = URL.bytes
 		new DataHashPair(store(data), data)
 	}
@@ -117,9 +118,13 @@ class HashCache extends Cache {
 	 * @return the data
 	 */
 	byte[] download(String hash, URL URL) {
-		LOGGER.fine "[$storage] Downloading $URL with expected hash $hash"
 		def file = getPath(hash).toFile()
-		file.exists() ? file.bytes : _download(hash, URL)
+		if (file.exists()) {
+			return file.bytes
+		}
+
+		LOGGER.trace "[$storage] Downloading $URL with expected hash $hash"
+		_download(hash, URL)
 	}
 
 	/**
@@ -133,9 +138,11 @@ class HashCache extends Cache {
 	 * @param URL
 	 */
 	void preDownload(String hash, URL URL) {
-		LOGGER.fine "[$storage] Predownloading $URL with expected hash $hash"
 		def file = getPath(hash).toFile()
-		if (!file.exists()) _download(hash, URL)
+		if (!file.exists())  {
+			LOGGER.trace "[$storage] Predownloading $URL with expected hash $hash"
+			_download(hash, URL)
+		}
 	}
 
 	/**
@@ -147,7 +154,7 @@ class HashCache extends Cache {
 	 */
 	@Override
 	void copyFrom(Path otherCache) {
-		LOGGER.fine "[$storage] Copying from $otherCache"
+		LOGGER.debug "[$storage] Copying from $otherCache"
 		def startTime = System.nanoTime()
 		Files.walk(otherCache)
 		     .filter(Files.&isRegularFile)
@@ -155,7 +162,7 @@ class HashCache extends Cache {
 		         store(path.bytes)
 		     }
 		def time = System.nanoTime() - startTime
-		LOGGER.fine "[$storage] Copy finished in ${time / 1000000000}s"
+		LOGGER.debug "[$storage] Copy finished in ${time / 1000000000}s"
 	}
 
 	/**
@@ -166,7 +173,11 @@ class HashCache extends Cache {
 	 */
 	@Override
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.fine "[$storage] Copying from trusted cache $trustedCache"
+		if (!storage.toFile().exists()) {
+			LOGGER.debug "[$storage] Not verifying cache: storage does not exist"
+			return
+		}
+		LOGGER.debug "[$storage] Copying from trusted cache $trustedCache"
 		def startTime = System.nanoTime()
 		Files.walk(trustedCache)
 		     .filter(Files.&isRegularFile)
@@ -177,22 +188,22 @@ class HashCache extends Cache {
 		         Files.copy(path, destination)
 		     }
 		def time = System.nanoTime() - startTime
-		LOGGER.fine "[$storage] Copy finished in ${time / 1000000000}s"
+		LOGGER.debug "[$storage] Trusted copy finished in ${time / 1000000000}s"
 
 	}
 
 	void verify(VerificationAction action) {
 		if (!storage.toFile().exists()) {
-			LOGGER.fine "[$storage] Not verifying cache: storage does not exist"
+			LOGGER.debug "[$storage] Not verifying cache: storage does not exist"
 			return
 		}
-		LOGGER.fine "[$storage] Verifying cache"
+		LOGGER.debug "[$storage] Verifying cache"
 		def startTime = System.nanoTime()
 		Files.walk(storage)
 		     .filter(Files.&isRegularFile)
 		     .filter { DigestUtils.sha1Hex(it.bytes) != it.toFile().name }
 		     .forEach { Path path ->
-		         LOGGER.warning "[$storage] File $path did not match expected hash: ${action.action} file."
+		         LOGGER.warn "[$storage] File $path did not match expected hash: ${action.action} file."
 		         switch (action) {
 		             case VerificationAction.REHASH:
 		                 store(path.bytes)
@@ -201,15 +212,17 @@ class HashCache extends Cache {
 		         }
 		     }
 		def time = System.nanoTime() - startTime
-		LOGGER.fine "[$storage] Verified cache in ${time / 1000000000}s"
+		LOGGER.debug "[$storage] Verified cache in ${time / 1000000000}s"
 	}
 
 	private byte[] _download(String hash, URL URL) {
+		LOGGER.info "Downloading $URL"
 		byte[] data = HttpClients.createDefault().execute(new HttpGet(URL.toURI())).entity.content.bytes
 
 		String downloadedHash = store(data)
 
 		if (!downloadedHash.equals(hash))
+			getPath(downloadedHash).toFile().delete()
 			throw new InvalidResponseException("$URL did not match hash \"$hash\"")
 
 		data

@@ -46,6 +46,7 @@ class AssetsTask implements Task {
 
 	@Override
 	void after() {
+		//TODO remove this and make it a verify method
 		Thread.start {
 			cache.objects.verify(HashCache.VerificationAction.DELETE)
 		}

@@ -3,9 +3,10 @@ package uk.co.rx14.jmclaunchlib.caches
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import groovy.transform.ToString
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 import java.nio.file.Path
-import java.util.logging.Logger
 
 import static uk.co.rx14.jmclaunchlib.util.Minecraft.minecraftDirectory
 
@@ -14,7 +15,7 @@ import static uk.co.rx14.jmclaunchlib.util.Minecraft.minecraftDirectory
 @Immutable(knownImmutableClasses = [Path.class, MinecraftMaven.class])
 class MinecraftCaches extends Cache {
 
-	private final static Logger LOGGER = Logger.getLogger(MinecraftCaches.class.name)
+	private final static Log LOGGER = LogFactory.getLog(MinecraftCaches)
 
 	Path storage
 	AssetsCache assets
@@ -31,7 +32,7 @@ class MinecraftCaches extends Cache {
 			natives: storage.resolve("natives")
 		)
 
-		LOGGER.fine "Created $cache"
+		LOGGER.trace "Created $cache"
 
 		cache.copyFromMinecraftDirectory()
 
@@ -40,7 +41,7 @@ class MinecraftCaches extends Cache {
 
 	@Override
 	void copyFrom(Path otherCache) {
-		LOGGER.fine "Copying $otherCache to $storage"
+		LOGGER.trace "Copying $otherCache to $storage"
 		assets.copyFrom(otherCache.resolve(storage.relativize(assets.storage)))
 		versions.copyFrom(otherCache.resolve(storage.relativize(versions.storage)))
 		libs.copyFrom(otherCache.resolve(storage.relativize(libs.storage)))
@@ -48,7 +49,7 @@ class MinecraftCaches extends Cache {
 
 	@Override
 	void copyFromTrusted(Path trustedCache) {
-		LOGGER.fine "Copying trusted cache $trustedCache to $storage"
+		LOGGER.trace "Copying trusted cache $trustedCache to $storage"
 		assets.copyFromTrusted(trustedCache.resolve(storage.relativize(assets.storage)))
 		versions.copyFromTrusted(trustedCache.resolve(storage.relativize(versions.storage)))
 		libs.copyFromTrusted(trustedCache.resolve(storage.relativize(libs.storage)))

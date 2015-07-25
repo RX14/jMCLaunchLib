@@ -11,23 +11,33 @@ repositories {
 }
 
 dependencies {
-	compile "org.codehaus.groovy:groovy-all:2.4.3"
+	compile "org.codehaus.groovy:groovy-all:2.4.3:indy"
 	compile "com.mashape.unirest:unirest-java:1.4.5"
 	compile "commons-codec:commons-codec:1.10"
 	compile "org.tukaani:xz:1.5"
 	compile "commons-io:commons-io:2.4"
+	compile "commons-logging:commons-logging:1.2"
 
 	testCompile "junit:junit:4.12"
 	testCompile "org.assertj:assertj-core:3.0.0"
 }
 
+tasks.withType(GroovyCompile) {
+    groovyOptions.optimizationOptions.indy = true
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = 'sources'
+	classifier = "sources"
 	from sourceSets.main.allSource
 }
 
+task javadocJar(type: Jar, dependsOn:javadoc) {
+     classifier = "javadoc"
+     from javadoc.destinationDir
+}
 artifacts {
 	archives sourcesJar
+	archives javadocJar
 }
 
 publishing {
@@ -36,6 +46,7 @@ publishing {
 			from components.java
 
 			artifact sourcesJar
+			artifact javadocJar
 		}
 	}
 }
@@ -59,8 +70,6 @@ bintray {
 	}
 }
 
-sourceSets.main.resources { exclude "logging.properties" }
-
 afterReleaseBuild.dependsOn bintrayUpload
 
 jacocoTestReport {
@@ -75,7 +84,7 @@ test {
 	maxParallelForks = Runtime.getRuntime().availableProcessors();
 
 	testLogging {
-		exceptionFormat = 'full'
+		exceptionFormat = "full"
 		showStandardStreams = true
 	}
 

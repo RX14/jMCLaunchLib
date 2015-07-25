@@ -2,16 +2,17 @@ package uk.co.rx14.jmclaunchlib.caches
 
 import groovy.transform.Immutable
 import groovy.transform.ToString
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import uk.co.rx14.jmclaunchlib.util.MavenIdentifier
 
 import java.nio.file.Path
-import java.util.logging.Logger
 
 @Immutable(knownImmutableClasses = [Path.class])
 @ToString(includePackage = false, includeNames = true)
 class MinecraftMaven extends Cache {
 
-	private final static Logger LOGGER = Logger.getLogger(MinecraftMaven.class.name)
+	private final static Log LOGGER = LogFactory.getLog(MinecraftMaven)
 
 	Path storage
 
@@ -20,7 +21,7 @@ class MinecraftMaven extends Cache {
 	}
 
 	File resolve(MavenIdentifier id, String repo) {
-		LOGGER.finer "Resolving dependency: $id.identifier in repo $repo"
+		LOGGER.trace "Resolving dependency: $id.identifier in repo $repo"
 
 		def localPath = storage.resolve(id.path).toFile()
 
@@ -41,7 +42,7 @@ class MinecraftMaven extends Cache {
 			def artifactURL = "$repo$id.path".toURL()
 			localPath.parentFile.mkdirs()
 
-			LOGGER.fine "Downloading $artifactURL"
+			LOGGER.info "Downloading $artifactURL"
 			localPath.bytes = artifactURL.bytes
 		}
 

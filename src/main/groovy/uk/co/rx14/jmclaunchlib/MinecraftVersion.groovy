@@ -1,6 +1,8 @@
 package uk.co.rx14.jmclaunchlib
 
 import groovy.json.JsonSlurper
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import uk.co.rx14.jmclaunchlib.caches.EtagCache
 
 import java.util.logging.Logger
@@ -8,7 +10,7 @@ import java.util.logging.Logger
 
 class MinecraftVersion {
 
-	private static final Logger LOGGER = Logger.getLogger(MinecraftVersion.class.getName())
+	private static final Log LOGGER = LogFactory.getLog(MinecraftVersion)
 
 	final String version
 	final EtagCache versionCache
@@ -55,7 +57,7 @@ class MinecraftVersion {
 
 	private Map applyParent(versionJson) {
 		if (versionJson.inheritsFrom) {
-			LOGGER.fine "[$versionJson.id] Loading parent json $versionJson.inheritsFrom"
+			LOGGER.debug "[$versionJson.id] Loading parent json $versionJson.inheritsFrom"
 
 			def parent = new MinecraftVersion(versionJson.inheritsFrom, versionCache)
 			versionJson.libraries.addAll(parent.libs)

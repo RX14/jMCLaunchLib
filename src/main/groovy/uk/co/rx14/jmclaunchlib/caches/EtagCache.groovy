@@ -3,16 +3,17 @@ package uk.co.rx14.jmclaunchlib.caches
 import com.mashape.unirest.http.Unirest
 import groovy.transform.Immutable
 import groovy.transform.ToString
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 import javax.xml.ws.http.HTTPException
 import java.nio.file.Path
-import java.util.logging.Logger
 
 @ToString(includePackage = false, includeNames = true)
 @Immutable(knownImmutableClasses = [Path.class])
 class EtagCache extends Cache {
 
-	private final static Logger LOGGER = Logger.getLogger(EtagCache.class.name)
+	private final static Log LOGGER = LogFactory.getLog(EtagCache)
 
 	Path storage
 
@@ -22,7 +23,7 @@ class EtagCache extends Cache {
 	}
 
 	byte[] get(URL URL) {
-		LOGGER.fine "Getting $URL"
+		LOGGER.trace "[$storage] Getting $URL"
 
 		def filePath = getPath(URL).toFile()
 		def etagPath = getEtagPath(URL).toFile()
@@ -30,7 +31,7 @@ class EtagCache extends Cache {
 		filePath.parentFile.mkdirs()
 
 		if (etagPath.exists() && !filePath.exists()) {
-			LOGGER.fine "Etag file $etagPath exists but file $filePath does not: Deleting etag file."
+			LOGGER.debug "[$storage] Etag file $etagPath exists but file $filePath does not: Deleting etag file."
 			etagPath.delete()
 		}
 
@@ -38,7 +39,7 @@ class EtagCache extends Cache {
 		def request = Unirest.get(URL.toString())
 
 		if (localEtag) {
-			LOGGER.fine "Etag exists, adding header If-None-Match: $localEtag"
+			LOGGER.trace "[$storage] Etag exists, adding header If-None-Match: $localEtag"
 			request.header("If-None-Match", localEtag)
 		}
 
@@ -47,16 +48,17 @@ class EtagCache extends Cache {
 		def time = System.nanoTime() - startTime
 
 		if (response.status == 304) { //Return from cache
-			LOGGER.fine "$URL returned 304 in ${time / 1000000000}s: using cache"
+			LOGGER.debug "[$storage] $URL returned 304 in ${time / 1000000000}s: using cache"
 			filePath.bytes
 		} else if (response.status == 200) { //Return from response
-			LOGGER.fine "$URL returned 200 in ${time / 1000000000}s: caching"
-			LOGGER.fine "Etag was ${response.headers.getFirst("etag")}"
+			LOGGER.info "Downloading $URL"
+			LOGGER.debug "[$storage] $URL returned 200 in ${time / 1000000000}s: caching"
+			LOGGER.trace "[$storage] Etag was ${response.headers.getFirst("etag")}"
 			etagPath.text = response.headers.getFirst("etag")
 			filePath.bytes = response.body.bytes
 			filePath.bytes
 		} else {
-			LOGGER.warning "$URL returned $response.status in ${time / 1000000000}s: error"
+			LOGGER.warn "[$storage] $URL returned $response.status in ${time / 1000000000}s: error"
 			throw new HTTPException(response.status)
 		}
 	}

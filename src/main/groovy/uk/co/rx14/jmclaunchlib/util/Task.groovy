@@ -3,11 +3,12 @@ package uk.co.rx14.jmclaunchlib.util
 import groovy.transform.Canonical
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.logging.Logger
+
+import static uk.co.rx14.jmclaunchlib.Constants.executor
 
 /**
  * A task that can be competed, has a relative weight and subtasks.
@@ -20,11 +21,10 @@ import java.util.logging.Logger
 @Canonical
 trait Task {
 
-	private static final Logger LOGGER = Logger.getLogger(Task.class.getName())
-
-	private static final ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("jMCLaunchLib-taskpool"))
+	private static final Log LOGGER = LogFactory.getLog(Task)
 
 	abstract List<Task> getSubtasks()
+
 	abstract int getWeight()
 
 	/**
@@ -36,6 +36,7 @@ trait Task {
 	abstract String getDescription()
 
 	abstract void before()
+
 	abstract void after()
 
 	private AtomicBoolean _started = new AtomicBoolean()
@@ -44,26 +45,32 @@ trait Task {
 	private float _startTime
 
 	void start() {
-		if (!_started.compareAndSet(false, true)) return //Only one thread may progress past here
+		if (!_started.compareAndSet(false, true)) {
+			while (!_done) {
+				this.wait(10000)
+			} //Wait for task to finish
+			return
+		} //Only one thread may progress past here
 
-		LOGGER.fine "$description: started"
+		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()}::before enter"
 		_startTime = System.nanoTime()
 		before()
-		LOGGER.finest "[${Thread.currentThread().name}] ${getClass()}::before exit"
+		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()}::before exit"
 
-		LOGGER.finest "[${Thread.currentThread().name}] ${getClass()} starting in parallel: $subtasks"
+		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()} starting in parallel: $subtasks"
 		subtasks.collect { task ->
 			executor.submit { task.start() }
 		}.each {
 			it.get()
 		}
 
-		LOGGER.finest "[${Thread.currentThread().name}] ${getClass()}::after enter"
+		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()}::after enter"
 		after()
 		def time = System.nanoTime() - _startTime
-		LOGGER.fine "$description: finished in ${time / 1000000000}s"
+		LOGGER.debug "$description: finished in ${time / 1000000000}s"
 
 		_done = true
+		synchronized (this) { this.notifyAll() }
 	}
 
 	int getTotalWeight() {
