@@ -1,10 +1,14 @@
-package uk.co.rx14.jmclaunchlib.tasks
+package uk.co.rx14.jmclaunchlib
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import uk.co.rx14.jmclaunchlib.LaunchSpec
 import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
 import uk.co.rx14.jmclaunchlib.caches.MinecraftCaches
+import uk.co.rx14.jmclaunchlib.tasks.AssetsTask
+import uk.co.rx14.jmclaunchlib.tasks.LibsTask
+import uk.co.rx14.jmclaunchlib.tasks.LoginTask
+import uk.co.rx14.jmclaunchlib.tasks.MinecraftJarTask
 import uk.co.rx14.jmclaunchlib.util.Strings
 import uk.co.rx14.jmclaunchlib.util.Task
 import uk.co.rx14.jmclaunchlib.version.Version
@@ -18,7 +22,7 @@ class LaunchTask implements Task {
 	private List<Task> subtasks = new CopyOnWriteArrayList<>()
 	final String description = "Prepare to launch Minecraft"
 
-	LaunchSpec spec
+	final LaunchSpec spec
 
 	private MinecraftCaches caches
 	private Version version
@@ -84,4 +88,9 @@ class LaunchTask implements Task {
 	}
 
 	List<Task> getSubtasks() { subtasks.asImmutable() }
+
+	LaunchSpec getSpec() {
+		start()
+		spec
+	}
 }
