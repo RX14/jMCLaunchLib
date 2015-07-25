@@ -3,10 +3,10 @@ package uk.co.rx14.jmclaunchlib.tasks
 import groovy.json.JsonSlurper
 import uk.co.rx14.jmclaunchlib.Constants
 import uk.co.rx14.jmclaunchlib.LaunchSpec
-import uk.co.rx14.jmclaunchlib.MinecraftVersion
 import uk.co.rx14.jmclaunchlib.caches.AssetsCache
 import uk.co.rx14.jmclaunchlib.caches.HashCache
 import uk.co.rx14.jmclaunchlib.util.Task
+import uk.co.rx14.jmclaunchlib.version.Version
 
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -15,21 +15,21 @@ class AssetsTask implements Task {
 	private final List<Task> _subtasks = new CopyOnWriteArrayList<>()
 	final String description = "Download assets listing"
 
-	MinecraftVersion minecraftVersion
+	Version version
 	AssetsCache cache
 	LaunchSpec spec
 
-	AssetsTask(MinecraftVersion minecraftVersion, AssetsCache cache, LaunchSpec spec) {
-		this.minecraftVersion = minecraftVersion
+	AssetsTask(Version version, AssetsCache cache, LaunchSpec spec) {
+		this.version = version
 		this.cache = cache
 		this.spec = spec
 	}
 
 	@Override
 	void before() {
-		if (minecraftVersion.assets) {
+		if (version.assetsVersion) {
 			def index = new JsonSlurper().parseText(
-				new String(cache.indexes.get("$Constants.MinecraftIndexesBase/${minecraftVersion.assets}.json".toURL()))
+				new String(cache.indexes.get("$Constants.MinecraftIndexesBase/${version.assetsVersion}.json".toURL()))
 			)
 
 			index.objects.each {

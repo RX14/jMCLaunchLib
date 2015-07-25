@@ -4,12 +4,12 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import uk.co.rx14.jmclaunchlib.Constants
 import uk.co.rx14.jmclaunchlib.LaunchSpec
-import uk.co.rx14.jmclaunchlib.MinecraftVersion
 import uk.co.rx14.jmclaunchlib.caches.MinecraftMaven
 import uk.co.rx14.jmclaunchlib.util.Compression
 import uk.co.rx14.jmclaunchlib.util.MavenIdentifier
 import uk.co.rx14.jmclaunchlib.util.OS
 import uk.co.rx14.jmclaunchlib.util.Task
+import uk.co.rx14.jmclaunchlib.version.Version
 
 import java.nio.file.Path
 import java.util.stream.Collectors
@@ -23,11 +23,11 @@ class LibsTask implements Task {
 	final String description = "Download Libraries"
 
 	MinecraftMaven mavenCache
-	MinecraftVersion version
+	Version version
 	Path nativesDirectory
 	LaunchSpec spec
 
-	LibsTask(MinecraftMaven mavenCache, MinecraftVersion version, Path nativesDirectory, LaunchSpec spec) {
+	LibsTask(MinecraftMaven mavenCache, Version version, Path nativesDirectory, LaunchSpec spec) {
 		this.mavenCache = mavenCache
 		this.version = version
 		this.nativesDirectory = nativesDirectory

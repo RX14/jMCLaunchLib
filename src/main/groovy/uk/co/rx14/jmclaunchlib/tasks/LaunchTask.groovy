@@ -3,11 +3,11 @@ package uk.co.rx14.jmclaunchlib.tasks
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import uk.co.rx14.jmclaunchlib.LaunchSpec
-import uk.co.rx14.jmclaunchlib.MinecraftVersion
 import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
 import uk.co.rx14.jmclaunchlib.caches.MinecraftCaches
 import uk.co.rx14.jmclaunchlib.util.Strings
 import uk.co.rx14.jmclaunchlib.util.Task
+import uk.co.rx14.jmclaunchlib.version.Version
 
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -21,47 +21,49 @@ class LaunchTask implements Task {
 	LaunchSpec spec
 
 	private MinecraftCaches caches
-	private MinecraftVersion minecraftVersion
+	private Version version
 
 	private String username
 	private PasswordSupplier passwordSupplier
 
-	LaunchTask(LaunchSpec spec, MinecraftCaches caches, MinecraftVersion minecraftVersion, String username, PasswordSupplier passwordSupplier) {
+	LaunchTask(LaunchSpec spec, MinecraftCaches caches, Version version, String username, PasswordSupplier passwordSupplier) {
 		this.spec = spec
 		this.caches = caches
-		this.minecraftVersion = minecraftVersion
+		this.version = version
 		this.username = username
 		this.passwordSupplier = passwordSupplier
 	}
 
 	@Override
 	void before() {
+		spec.nativesDirectory = caches.natives.resolve(version.MCVersion)
+
 		subtasks << new LoginTask(username, passwordSupplier, spec.offline, caches.storage.resolve("auth.json").toFile(), spec)
-		subtasks << new LibsTask(caches.libs, minecraftVersion, caches.natives.resolve(minecraftVersion.version), spec)
-		subtasks << new MinecraftJarTask(caches.versions, minecraftVersion, spec)
-		subtasks << new AssetsTask(minecraftVersion, caches.assets, spec)
+		subtasks << new LibsTask(caches.libs, version, spec.nativesDirectory, spec)
+		subtasks << new MinecraftJarTask(caches.versions, version, spec)
+		subtasks << new AssetsTask(version, caches.assets, spec)
 	}
 
 	@Override
 	void after() {
 		spec.launchArgs = getArgs(spec)
 
-		spec.jvmArgs = ["-Djava.library.path=${caches.natives.resolve(minecraftVersion.version).toAbsolutePath()}".toString()]
+		spec.jvmArgs = ["-Djava.library.path=${spec.nativesDirectory.toAbsolutePath()}".toString()]
 
-		spec.mainClass = minecraftVersion.mainClass
+		spec.mainClass = version.mainClass
 	}
 
 	@CompileDynamic
 	private List<String> getArgs(LaunchSpec spec) {
-		def args = minecraftVersion.minecraftArguments.split(" ")
+		def args = version.minecraftArguments.split(" ")
 
 		args = args.collect { String arg ->
 			arg.replace('${auth_player_name}', spec.auth.selectedProfile.name)
-			   .replace('${version_name}', minecraftVersion.version)
+			   .replace('${version_name}', version.MCVersion)
 			   .replace('${game_directory}', "${spec.minecraftDirectory.toAbsolutePath()}")
 			   .replace('${game_assets}', "${spec.assetsPath.toAbsolutePath()}")
 			   .replace('${assets_root}', "${caches.assets.storage.toAbsolutePath()}")
-			   .replace('${assets_index_name}', minecraftVersion.assets)
+			   .replace('${assets_index_name}', version.assetsVersion)
 			   .replace('${user_properties}', "{}")
 			   .replace('${auth_uuid}', spec.auth.selectedProfile.id)
 			   .replace('${auth_access_token}', spec.auth.accessToken)

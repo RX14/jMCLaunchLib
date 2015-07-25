@@ -12,6 +12,7 @@ import java.nio.file.Path
 class LaunchSpec {
 	Path minecraftDirectory
 	Path assetsPath
+	Path nativesDirectory
 
 	MinecraftAuthResult auth
 	boolean offline

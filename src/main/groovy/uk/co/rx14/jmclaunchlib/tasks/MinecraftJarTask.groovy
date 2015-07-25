@@ -1,9 +1,9 @@
 package uk.co.rx14.jmclaunchlib.tasks
 
 import uk.co.rx14.jmclaunchlib.LaunchSpec
-import uk.co.rx14.jmclaunchlib.MinecraftVersion
 import uk.co.rx14.jmclaunchlib.caches.EtagCache
 import uk.co.rx14.jmclaunchlib.util.Task
+import uk.co.rx14.jmclaunchlib.version.Version
 
 class MinecraftJarTask implements Task {
 	final int weight = 5
@@ -11,12 +11,12 @@ class MinecraftJarTask implements Task {
 	final String description = "Download minecraft.jar"
 
 	EtagCache versionCache
-	MinecraftVersion minecraftVersion
+	Version version
 	LaunchSpec spec
 
-	MinecraftJarTask(EtagCache versionCache, MinecraftVersion minecraftVersion, LaunchSpec spec) {
+	MinecraftJarTask(EtagCache versionCache, Version version, LaunchSpec spec) {
 		this.versionCache = versionCache
-		this.minecraftVersion = minecraftVersion
+		this.version = version
 		this.spec = spec
 	}
 
@@ -25,7 +25,7 @@ class MinecraftJarTask implements Task {
 
 	@Override
 	void after() {
-		versionCache.get(minecraftVersion.jarDownloadUrl)
-		spec.classpath.add(versionCache.getPath(minecraftVersion.jarDownloadUrl).toFile())
+		versionCache.get(version.jarDownloadUrl)
+		spec.classpath.add(versionCache.getPath(version.jarDownloadUrl).toFile())
 	}
 }
