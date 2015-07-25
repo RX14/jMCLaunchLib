@@ -40,7 +40,7 @@ class LoginTask implements Task {
 	void after() {
 		if (offline) {
 			spec.auth = new MinecraftAuthResult(
-				accessToken: 'fakeAccessToken',
+				accessToken: '-',
 				clientToken: '',
 				valid: true,
 				selectedProfile: new MinecraftAuthResult.Profile(
