@@ -17,6 +17,8 @@ class LaunchSpec {
 	MinecraftAuthResult auth
 	boolean offline
 
+	boolean netOffline
+
 	List<File> classpath = [].asSynchronized()
 	List<String> launchArgs
 	List<String> jvmArgs

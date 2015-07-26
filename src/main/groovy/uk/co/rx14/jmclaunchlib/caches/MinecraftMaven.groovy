@@ -4,6 +4,7 @@ import groovy.transform.Immutable
 import groovy.transform.ToString
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import uk.co.rx14.jmclaunchlib.exceptions.OfflineException
 import uk.co.rx14.jmclaunchlib.util.MavenIdentifier
 
 import java.nio.file.Path
@@ -15,6 +16,7 @@ class MinecraftMaven extends Cache {
 	private final static Log LOGGER = LogFactory.getLog(MinecraftMaven)
 
 	Path storage
+	boolean offline
 
 	File resolve(String identifier, String repo) {
 		resolve(MavenIdentifier.of(identifier), repo)
@@ -34,6 +36,8 @@ class MinecraftMaven extends Cache {
 		}
 
 		if (!localPath.exists()) {
+
+			if (offline) throw new OfflineException("Cannot download $id.identifier")
 
 			if (!repo.endsWith("/")) {
 				repo += "/"

@@ -14,6 +14,7 @@ abstract class Cache {
 	private final static Log LOGGER = LogFactory.getLog(Cache)
 
 	abstract Path getStorage();
+	abstract boolean isOffline();
 
 	/**
 	 * Copies all files from another cache to the current cache. The cache

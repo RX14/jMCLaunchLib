@@ -2,7 +2,6 @@ package uk.co.rx14.jmclaunchlib
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
-import uk.co.rx14.jmclaunchlib.LaunchSpec
 import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
 import uk.co.rx14.jmclaunchlib.caches.MinecraftCaches
 import uk.co.rx14.jmclaunchlib.tasks.AssetsTask
@@ -41,6 +40,8 @@ class LaunchTask implements Task {
 	@Override
 	void before() {
 		spec.nativesDirectory = caches.natives.resolve(version.MCVersion)
+
+		if (spec.netOffline) spec.offline = true
 
 		subtasks << new LoginTask(username, passwordSupplier, spec.offline, caches.storage.resolve("auth.json").toFile(), spec)
 		subtasks << new LibsTask(caches.libs, version, spec.nativesDirectory, spec)

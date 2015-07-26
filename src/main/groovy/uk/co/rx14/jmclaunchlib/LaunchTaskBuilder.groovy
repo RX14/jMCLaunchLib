@@ -11,14 +11,14 @@ import uk.co.rx14.jmclaunchlib.version.Version
 
 import java.nio.file.FileSystems
 import java.nio.file.Path
-import java.util.function.Function
 
 @CompileStatic
-@Immutable(copyWith = true, knownImmutableClasses = [Path, PasswordSupplier, Function])
+@Immutable(copyWith = true, knownImmutableClasses = [Path, PasswordSupplier, Version])
 class LaunchTaskBuilder {
-	Function<LaunchTaskBuilder, Version> versionSupplier
+	Version version
 
 	Path instanceDir
+
 	MinecraftCaches caches
 
 	PasswordSupplier passwordSupplier = NullPasswordSupplier.INSTANCE
@@ -29,30 +29,28 @@ class LaunchTaskBuilder {
 	boolean netOffline
 
 	LaunchTask build() {
-		Objects.requireNonNull(versionSupplier, "Version should be set")
-		Objects.requireNonNull(instanceDir, "Instance directory should be set")
+		Objects.requireNonNull(version, "Version should be set")
 		Objects.requireNonNull(caches, "Caches should be set")
+		Objects.requireNonNull(instanceDir, "Instance directory should be set")
 		Objects.requireNonNull(username, "Username should be set")
 
-		def version = versionSupplier.apply(this)
-
-		Objects.requireNonNull(version, "Version supplier returned null")
-
-		def spec = new LaunchSpec(minecraftDirectory: instanceDir, offline: offline)
+		def spec = new LaunchSpec(minecraftDirectory: instanceDir, offline: offline, netOffline: netOffline)
 
 		new LaunchTask(spec, caches, version, username, passwordSupplier)
 	}
 
 	LaunchTaskBuilder setVersion(Version version) {
-		this.copyWith versionSupplier: { version }
+		this.copyWith version: version
 	}
 
 	LaunchTaskBuilder setMinecraftVersion(String minecraftVersion) {
-		this.copyWith versionSupplier: { LaunchTaskBuilder it -> new MinecraftVersion(minecraftVersion, it.caches.versions) }
+		if (!caches) throw new IllegalStateException("Caches must be set before setting the Minecraft Version")
+		this.copyWith version: new MinecraftVersion(minecraftVersion, caches.versions)
 	}
 
 	LaunchTaskBuilder setForgeVersion(String minecraftVersion, String forgeVersion) {
-		this.copyWith versionSupplier: { LaunchTaskBuilder it -> new ForgeVersion(minecraftVersion, forgeVersion, it.caches) }
+		if (!caches) throw new IllegalStateException("Caches must be set before setting the Minecraft Version")
+		this.copyWith version: new ForgeVersion(minecraftVersion, forgeVersion, caches)
 	}
 
 
@@ -66,14 +64,17 @@ class LaunchTaskBuilder {
 
 
 	LaunchTaskBuilder setCachesDir(Path cachesDir) {
-		this.copyWith caches: MinecraftCaches.create(cachesDir)
+		if (version) throw new IllegalStateException("Caches must not be re-set after setting the Minecraft version")
+		this.copyWith caches: MinecraftCaches.create(cachesDir, netOffline)
 	}
 
 	LaunchTaskBuilder setCachesDir(String cachesDir) {
-		this.copyWith caches: MinecraftCaches.create(FileSystems.default.getPath(cachesDir))
+		if (version) throw new IllegalStateException("Caches must not be re-set after setting the Minecraft version")
+		this.copyWith caches: MinecraftCaches.create(FileSystems.default.getPath(cachesDir), netOffline)
 	}
 
 	LaunchTaskBuilder setCaches(MinecraftCaches caches) {
+		if (version) throw new IllegalStateException("Caches must not be re-set after setting the Minecraft version")
 		this.copyWith caches: caches
 	}
 
@@ -95,10 +96,12 @@ class LaunchTaskBuilder {
 	}
 
 	LaunchTaskBuilder setNetOffline(boolean netOffline) {
+		if (caches) throw new IllegalStateException("netOffline must be set before caches")
 		this.copyWith netOffline: netOffline
 	}
 
 	LaunchTaskBuilder setNetOffline() {
+		if (caches) throw new IllegalStateException("netOffline must be set before caches")
 		this.copyWith netOffline: true
 	}
 }

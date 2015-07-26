@@ -16,6 +16,7 @@ class AssetsCache extends Cache {
 	private final static Log LOGGER = LogFactory.getLog(AssetsCache)
 
 	Path storage
+	boolean offline
 	HashCache objects
 	EtagCache indexes
 
@@ -28,14 +29,15 @@ class AssetsCache extends Cache {
 	 * @param others other assets caches such as {@code ~/.minecraft}.
 	 * @return
 	 */
-	static AssetsCache create(Path storage, Path... others) {
-		def objectsCache = new HashCache(storage.resolve("objects"))
-		def indexesCache = new EtagCache(storage.resolve("indexes"))
+	static AssetsCache create(Path storage, boolean offline = false, Path... others) {
+		def objectsCache = new HashCache(storage.resolve("objects"), offline)
+		def indexesCache = new EtagCache(storage.resolve("indexes"), offline)
 
 		def cache = new AssetsCache(
 			storage: storage,
 			objects: objectsCache,
-			indexes: indexesCache
+			indexes: indexesCache,
+			offline: offline
 		)
 
 		LOGGER.trace "Created $cache"

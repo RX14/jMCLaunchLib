@@ -18,18 +18,21 @@ class MinecraftCaches extends Cache {
 	private final static Log LOGGER = LogFactory.getLog(MinecraftCaches)
 
 	Path storage
+	boolean offline
+
 	AssetsCache assets
 	MinecraftMaven libs
 	EtagCache versions
 	Path natives
 
-	static MinecraftCaches create(Path storage) {
+	static MinecraftCaches create(Path storage, boolean offline = false) {
 		def cache = new MinecraftCaches(
 			storage: storage,
-			assets: AssetsCache.create(storage.resolve("assets")),
-			libs: new MinecraftMaven(storage.resolve("libs")),
-			versions: new EtagCache(storage.resolve("versions")),
-			natives: storage.resolve("natives")
+			assets: AssetsCache.create(storage.resolve("assets"), offline),
+			libs: new MinecraftMaven(storage.resolve("libs"), offline),
+			versions: new EtagCache(storage.resolve("versions"), offline),
+			natives: storage.resolve("natives"),
+			offline: offline
 		)
 
 		LOGGER.trace "Created $cache"

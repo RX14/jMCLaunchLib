@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
+import uk.co.rx14.jmclaunchlib.exceptions.OfflineException
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -27,6 +28,7 @@ class HashCache extends Cache {
 	private final static Log LOGGER = LogFactory.getLog(HashCache)
 
 	Path storage
+	boolean offline
 
 	/**
 	 * Stores the given data in the cache and returns it's hash.
@@ -102,8 +104,11 @@ class HashCache extends Cache {
 	 */
 	@CompileStatic(TypeCheckingMode.SKIP)
 	DataHashPair download(URL URL) {
+		if (offline) throw new OfflineException("[$storage] Can't download $URL")
+
 		LOGGER.info "Downloading $URL"
 		LOGGER.trace "[$storage] Downloading $URL"
+
 		byte[] data = URL.bytes
 		new DataHashPair(store(data), data)
 	}
@@ -216,6 +221,7 @@ class HashCache extends Cache {
 	}
 
 	private byte[] _download(String hash, URL URL) {
+		if (offline) throw new OfflineException("[$storage] Can't download $URL")
 		LOGGER.info "Downloading $URL"
 		byte[] data = HttpClients.createDefault().execute(new HttpGet(URL.toURI())).entity.content.bytes
 

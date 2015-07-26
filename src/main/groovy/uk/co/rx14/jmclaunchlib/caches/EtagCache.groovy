@@ -5,6 +5,7 @@ import groovy.transform.Immutable
 import groovy.transform.ToString
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import uk.co.rx14.jmclaunchlib.exceptions.OfflineException
 
 import javax.xml.ws.http.HTTPException
 import java.nio.file.Path
@@ -16,6 +17,7 @@ class EtagCache extends Cache {
 	private final static Log LOGGER = LogFactory.getLog(EtagCache)
 
 	Path storage
+	boolean offline
 
 	String getLocalEtag(URL URL) {
 		def path = getEtagPath(URL).toFile()
@@ -27,6 +29,15 @@ class EtagCache extends Cache {
 
 		def filePath = getPath(URL).toFile()
 		def etagPath = getEtagPath(URL).toFile()
+
+		if (offline) {
+			if (filePath.exists()) {
+				LOGGER.trace "[$storage] Offline and exists: returning file"
+				return filePath.bytes
+			} else {
+				throw new OfflineException("[$storage] $URL does not exist in this cache.")
+			}
+		}
 
 		filePath.parentFile.mkdirs()
 
@@ -49,18 +60,17 @@ class EtagCache extends Cache {
 
 		if (response.status == 304) { //Return from cache
 			LOGGER.debug "[$storage] $URL returned 304 in ${time / 1000000000}s: using cache"
-			filePath.bytes
 		} else if (response.status == 200) { //Return from response
 			LOGGER.info "Downloading $URL"
 			LOGGER.debug "[$storage] $URL returned 200 in ${time / 1000000000}s: caching"
 			LOGGER.trace "[$storage] Etag was ${response.headers.getFirst("etag")}"
 			etagPath.text = response.headers.getFirst("etag")
 			filePath.bytes = response.body.bytes
-			filePath.bytes
 		} else {
 			LOGGER.warn "[$storage] $URL returned $response.status in ${time / 1000000000}s: error"
 			throw new HTTPException(response.status)
 		}
+		filePath.bytes
 	}
 
 	Path getPath(URL URL) {
