@@ -16,5 +16,5 @@ class Constants {
 
 	public static final String[] XZLibs = [/org\.scala-lang.*/, /com\.typesafe.*/]
 
-	public static final ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("jMCLaunchLib-taskpool"))
+	public static final ExecutorService executor = Executors.newFixedThreadPool(10, new NamedThreadFactory("jMCLaunchLib taskpool"))
 }

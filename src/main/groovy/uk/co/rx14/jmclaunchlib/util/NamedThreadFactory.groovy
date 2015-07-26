@@ -11,7 +11,7 @@ class NamedThreadFactory implements ThreadFactory {
 	private final static Log LOGGER = LogFactory.getLog(NamedThreadFactory)
 
 	private String name
-	private int count = 0
+	private int count = 1
 
 	NamedThreadFactory(String name) {
 		this.name = name
@@ -21,7 +21,7 @@ class NamedThreadFactory implements ThreadFactory {
 	Thread newThread(Runnable r) {
 		def t = Executors.defaultThreadFactory().newThread(r)
 		t.daemon = true
-		t.name = "$name-thread-${count++}"
+		t.name = "$name #${count++}"
 
 		LOGGER.trace "Created thread $t.name"
 		t
