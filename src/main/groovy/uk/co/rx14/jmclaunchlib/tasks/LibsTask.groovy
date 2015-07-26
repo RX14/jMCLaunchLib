@@ -40,7 +40,7 @@ class LibsTask implements Task {
 		                  .filter(parseRules)
 		                  .map { new LibTask(it) }
 		                  .collect(Collectors.toList())
-		                       .asImmutable()
+		                  .asImmutable()
 	}
 
 	@Override
