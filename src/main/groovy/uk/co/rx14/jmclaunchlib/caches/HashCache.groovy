@@ -221,9 +221,10 @@ class HashCache extends Cache {
 
 		String downloadedHash = store(data)
 
-		if (!downloadedHash.equals(hash))
+		if (!downloadedHash.equals(hash)) {
 			getPath(downloadedHash).toFile().delete()
 			throw new InvalidResponseException("$URL did not match hash \"$hash\"")
+		}
 
 		data
 	}
