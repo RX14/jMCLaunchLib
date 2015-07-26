@@ -3,6 +3,7 @@ package uk.co.rx14.jmclaunchlib.caches
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import groovy.transform.ToString
+import org.apache.commons.io.FileUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -62,12 +63,20 @@ class MinecraftCaches extends Cache {
 		def marker = storage.resolve("hasCopiedMinecraftDirectory").toFile()
 		if (marker.exists()) return
 
-
 		def libsPath = minecraftDirectory.resolve("libraries")
 		if (libsPath.toFile().isDirectory()) libs.copyFrom(libsPath)
 
 		def assetsPath = minecraftDirectory.resolve("assets")
 		if (assetsPath.toFile().isDirectory()) assets.copyFrom(assetsPath)
+
+		def versionsDirectory = minecraftDirectory.resolve("versions").toFile()
+		if (versionsDirectory.isDirectory()) {
+			versionsDirectory.listFiles().each { File subdirectory ->
+				if (subdirectory.isDirectory()) {
+					FileUtils.copyDirectory(subdirectory, versions.storage.toFile())
+				}
+			}
+		}
 
 		marker.parentFile.mkdirs()
 		marker.createNewFile()
