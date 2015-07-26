@@ -1,7 +1,5 @@
 package uk.co.rx14.jmclaunchlib.exceptions
 
-import groovy.transform.InheritConstructors
-
 class OfflineException extends RuntimeException {
 	OfflineException(String message) {
 		super("Can't launch in network offline mode: $message")
