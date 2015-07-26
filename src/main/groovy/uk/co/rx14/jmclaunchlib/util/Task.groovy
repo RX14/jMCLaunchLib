@@ -60,7 +60,7 @@ trait Task {
 		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()} starting in parallel: $subtasks"
 		subtasks.collect { task ->
 			executor.submit { task.start() }
-		}.each {
+		}.reverse().each {
 			it.get()
 		}
 
