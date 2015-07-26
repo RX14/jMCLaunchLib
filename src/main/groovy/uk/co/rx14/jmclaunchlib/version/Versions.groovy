@@ -1,9 +1,10 @@
 package uk.co.rx14.jmclaunchlib.version
 
+import groovy.json.JsonSlurper
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import uk.co.rx14.jmclaunchlib.Constants
 import uk.co.rx14.jmclaunchlib.caches.EtagCache
-import uk.co.rx14.jmclaunchlib.caches.HashCache
 
 class Versions {
 
@@ -20,5 +21,19 @@ class Versions {
 		} else {
 			child
 		}
+	}
+
+	static List<String> minecraftVersions() {
+		minecraftVersions(null)
+	}
+
+	static List<String> minecraftVersions(EtagCache cache) {
+		def URL = "$Constants.MinecraftVersionsBase/versions.json".toURL()
+
+		byte[] data
+		if (cache) data = cache.get(URL) else data = URL.bytes
+
+		def list = new JsonSlurper().parse(data)
+		list.versions.id
 	}
 }
