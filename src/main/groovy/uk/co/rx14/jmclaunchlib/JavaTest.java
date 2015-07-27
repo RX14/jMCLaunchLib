@@ -9,7 +9,7 @@ public class JavaTest {
 		LaunchTask task = new LaunchTaskBuilder()
 			.setCachesDir("test/caches")
 			.setMinecraftVersion("1.7.10")
-			.setForgeVersion()
+//			.setForgeVersion()
 			.setInstanceDir("test/instance")
 			.setUsername("RX14")
 			.setOffline()
