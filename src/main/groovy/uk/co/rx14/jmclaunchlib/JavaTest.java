@@ -2,7 +2,10 @@ package uk.co.rx14.jmclaunchlib;
 
 import uk.co.rx14.jmclaunchlib.util.ChangePrinter;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class JavaTest {
 	public static void main(String[] args) {

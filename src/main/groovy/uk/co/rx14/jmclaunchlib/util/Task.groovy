@@ -3,11 +3,10 @@ package uk.co.rx14.jmclaunchlib.util
 import groovy.transform.Canonical
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 import java.util.concurrent.atomic.AtomicBoolean
 
+import static uk.co.rx14.jmclaunchlib.Constants.TaskLogger
 import static uk.co.rx14.jmclaunchlib.Constants.executor
 
 /**
@@ -21,7 +20,6 @@ import static uk.co.rx14.jmclaunchlib.Constants.executor
 @Canonical
 trait Task {
 
-	private static final Log LOGGER = LogFactory.getLog(Task)
 
 	abstract List<Task> getSubtasks()
 
@@ -52,22 +50,18 @@ trait Task {
 			return
 		} //Only one thread may progress past here
 
-		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()}::before enter"
+		TaskLogger.trace "[${Thread.currentThread().name}] ${getClass()}::before enter"
 		_startTime = System.nanoTime()
 		before()
-		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()}::before exit"
+		TaskLogger.trace "[${Thread.currentThread().name}] ${getClass()}::before exit"
 
-		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()} starting in parallel: $subtasks"
-		subtasks.collect { task ->
-			executor.submit { task.start() }
-		}.reverse().each {
-			it.get()
-		}
+		TaskLogger.trace "[${Thread.currentThread().name}] ${getClass()} starting in parallel: $subtasks"
+		subtasks.collect { Task task -> executor.submit { task.start() } }.reverse()*.get()
 
-		LOGGER.trace "[${Thread.currentThread().name}] ${getClass()}::after enter"
+		TaskLogger.trace "[${Thread.currentThread().name}] ${getClass()}::after enter"
 		after()
 		def time = System.nanoTime() - _startTime
-		LOGGER.debug "$description: finished in ${time / 1000000000}s"
+		TaskLogger.debug "$description: finished in ${time / 1000000000}s"
 
 		_done = true
 		synchronized (this) { this.notifyAll() }
@@ -93,7 +87,7 @@ trait Task {
 		if (_done) {
 			tasks += this
 		}
-		tasks.sort { a,b -> a.startTime<=>b.startTime }
+		tasks.sort { Task a, Task b -> a.startTime<=>b.startTime }
 	}
 
 	/**
@@ -104,7 +98,7 @@ trait Task {
 		if (_started.get() && !_done) {
 			tasks += this
 		}
-		tasks.sort { a,b -> b.startTime<=>a.startTime }
+		tasks.sort { Task a, Task b -> b.startTime<=>a.startTime }
 	}
 
 	/**
@@ -115,7 +109,7 @@ trait Task {
 		if (!_started.get() && !_done) {
 			tasks += this
 		}
-		tasks
+		tasks as List<Task>
 	}
 
 	boolean isStarted() { _started.get() }

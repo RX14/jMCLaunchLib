@@ -26,20 +26,16 @@ class Compression {
 
 		def zip = new ZipFile(zipFile)
 		try {
-			outer:
-			for (entry in (Enumeration<ZipEntry>) zip.entries()) {
-				for (exclusion in exclusions) {
-					if (entry.name.startsWith(exclusion))
-						continue outer
-				}
+			zip.entries().each { ZipEntry entry ->
+				if (exclusions.any { entry.name.startsWith(it) }) return
+
 				def entryFile = outPath.resolve(entry.name).toFile()
 				if (entry.isDirectory()) {
 					entryFile.mkdirs()
 				} else {
 					entryFile.parentFile.mkdirs()
 
-					def stream = zip.getInputStream(entry)
-					entryFile.bytes = stream.getBytes()
+					entryFile.bytes = zip.getInputStream(entry).bytes
 				}
 			}
 		} finally {
@@ -57,7 +53,7 @@ class Compression {
 
 		def zip = new ZipFile(zipFile)
 		try {
-			for (entry in (Enumeration<ZipEntry>) zip.entries()) {
+			for (ZipEntry entry in (List<ZipEntry>) zip.entries().toList()) {
 				if (entry.name == filePath && !entry.isDirectory()) {
 					def time = System.nanoTime() - startTime
 					LOGGER.debug "Extracted $filePath from $zipFile in ${time / 1000000000}s"

@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-	compile "org.codehaus.groovy:groovy-all:2.4.3:indy"
+	compile "org.codehaus.groovy:groovy-all:2.3.11:indy"
 	compile "com.mashape.unirest:unirest-java:1.4.5"
 	compile "commons-codec:commons-codec:1.10"
 	compile "org.tukaani:xz:1.5"
@@ -65,7 +65,6 @@ bintray {
 			name = project.version
 			released = new Date()
 			vcsTag = project.version
-			gpg.sign = true
 		}
 	}
 }
