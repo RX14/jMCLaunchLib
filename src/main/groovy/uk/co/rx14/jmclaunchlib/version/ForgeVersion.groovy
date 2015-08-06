@@ -66,6 +66,6 @@ class ForgeVersion implements Version {
 			"version.json"
 		)
 
-		this.json = Versions.applyParent(new JsonSlurper().parse(data) as Map, caches.versions)
+		this.json = Versions.applyParent(new JsonSlurper().parse(new String(data).chars) as Map, caches.versions)
 	}
 }

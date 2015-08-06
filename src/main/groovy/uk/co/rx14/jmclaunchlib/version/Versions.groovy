@@ -33,7 +33,7 @@ class Versions {
 		byte[] data
 		if (cache) data = cache.get(URL) else data = URL.bytes
 
-		def list = new JsonSlurper().parse(data)
+		def list = new JsonSlurper().parse(new String(data).chars)
 		list.versions.id
 	}
 }

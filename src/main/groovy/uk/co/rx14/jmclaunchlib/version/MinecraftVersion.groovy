@@ -61,9 +61,9 @@ class MinecraftVersion implements Version {
 		if (json) return
 
 		this.json = Versions.applyParent(
-			new JsonSlurper().parse(
+			new JsonSlurper().parse(new String(
 				cache.get("$Constants.MinecraftVersionsBase/$MCVersion/${MCVersion}.json".toURL())
-			) as Map,
+			).chars) as Map,
 			cache
 		)
 	}
