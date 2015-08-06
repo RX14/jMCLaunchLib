@@ -36,11 +36,10 @@ class LibsTask implements Task {
 
 	@Override
 	void before() {
-		subtasks = version.libs.stream()
-		                  .filter(parseRules)
-		                  .map { new LibTask(it) }
-		                  .collect(Collectors.toList())
-		                  .asImmutable()
+		subtasks = version.libs
+			.findAll(parseRules)
+			.collect { new LibTask(it) }
+			.asImmutable()
 	}
 
 	@Override

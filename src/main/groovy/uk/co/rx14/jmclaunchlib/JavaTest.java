@@ -6,10 +6,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.function.Supplier;
 
 public class JavaTest {
 	public static void main(String[] args) {
-		LaunchTask task = new LaunchTaskBuilder()
+		final LaunchTask task = new LaunchTaskBuilder()
 			.setCachesDir("test/caches")
 			.setMinecraftVersion("1.7.10")
 //			.setForgeVersion()
@@ -18,7 +19,12 @@ public class JavaTest {
 			.setOffline()
 			.build();
 
-		new ChangePrinter(() -> "" + task.getCompletedPercentage(), 100).start();
+		new ChangePrinter(
+			new Supplier<String>() {
+				public String get() {return "" + task.getCompletedPercentage();}
+			}
+			, 100
+		).start();
 
 		LaunchSpec spec = task.getSpec();
 
