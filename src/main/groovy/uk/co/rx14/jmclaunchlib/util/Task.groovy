@@ -44,9 +44,11 @@ trait Task {
 
 	void start() {
 		if (!_started.compareAndSet(false, true)) {
-			while (!_done) {
-				this.wait(10000)
-			} //Wait for task to finish
+			synchronized (this) {
+				while (!_done) {
+					this.wait(10000)
+				} //Wait for task to finish
+			}
 			return
 		} //Only one thread may progress past here
 
