@@ -71,7 +71,10 @@ bintray {
 	}
 }
 
+beforeReleaseBuild.dependsOn clean
 afterReleaseBuild.dependsOn bintrayUpload
+bintrayUpload.dependsOn "generatePomFileForMainPublication"
+bintrayUpload.dependsOn build
 
 jacocoTestReport {
 	reports {
