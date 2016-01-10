@@ -9,7 +9,7 @@ Although this library is written in Groovy, Java support **IS** a priority for m
 
 If you require help and support see me in the #RX14 channel on EsperNet.
 **Do not hesitate to report bugs and feature requests in the [Github Issues](https://github.com/RX14/jMCLaunchLib/issues).**
-Even if you decide not to use this library, please drop a note as to why so I can improve, for the good of the community.
+Even if you decide not to use this library, please drop a note as to how I can improve.
 
 How do I get it?
 ----------------
@@ -52,7 +52,7 @@ LaunchTask task = new LaunchTaskBuilder()
 
 This should be mostly self-explanitory apart from the requirement for a `PasswordSupplier`.
 `PasswordSupplier` is an interface with one method, `String getPassword(String username)`.
-This is required because my library stores authentication tokens but does not store passwords,
+This is required because jMCLaunchLib stores authentication tokens but does not store passwords,
 using this interface as a callback to request the password for a specific username enables the launcher to only ask the user for a password when absolutely needed.
 This will typically be called when the token has expired or when logging in for the first time.
 
