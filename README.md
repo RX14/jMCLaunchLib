@@ -33,7 +33,7 @@ This `Task` object will spawn several other Task objects which run in parallel (
 
 ```java
 LaunchTask task = new LaunchTaskBuilder()
-        .setCachesDir("test/caches") //Directory to cache stuff in, copies caches from .minecraft (and verifies)
+		.setCachesDir("test/caches") //Directory to cache stuff in, copies caches from .minecraft (and verifies)
 		
 		.setMinecraftVersion("1.7.10") //Set vanilla version
 		//OR
@@ -76,8 +76,18 @@ You can use `getLaunchArgs().add(...)` and `getJvmArgs().add(...)` to customise 
 Use `LaunchSpec.getJavaCommandline()` to get the arguments to pass to the Java executable as a String,
 or use `LaunchSpec.run(java.nio.file.Path javaExecutable)` to let jMCLaunchLib run Minecraft using the path to the java executable.
 The `run()` method returns a standard Java Process object so you can control Minecraft and route it's standard output streams.
+Please note that the instance directory must exist before calling run, or it will fail with a slightly cryptic error 267.
 
 (If you pester me enough I might write something cool to redirect stdout/err from a Process to useful places.)
+
+Below is an example of using the `LaunchSpec` class to run minecraft, using the current java executable.
+If you are creating a launcher, I strongly suggest you make the java executable path configurable,
+with a sensible default.
+
+```java
+spec.run(Paths.get(System.getProperty("java.home"), "bin", OS.getCURRENT() == OS.WINDOWS ? "java.exe" : "java"));
+```
+
 
 Customisation
 -------------
