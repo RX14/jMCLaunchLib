@@ -9,5 +9,5 @@ class NullPasswordSupplier implements PasswordSupplier {
 	public static final NullPasswordSupplier INSTANCE = new NullPasswordSupplier()
 
 	@Override
-	String getPassword(String username) { null }
+	String getPassword(String username, boolean retry, String failureMessage) { null }
 }

@@ -6,5 +6,5 @@ package uk.co.rx14.jmclaunchlib.auth;
  * This allows launchers to never store passwords, asking the user every time it is required.
  */
 public interface PasswordSupplier {
-	abstract String getPassword(String username);
+	abstract String getPassword(String username, boolean retry, String failureMessage);
 }

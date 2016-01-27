@@ -8,6 +8,7 @@ import uk.co.rx14.jmclaunchlib.LaunchSpec
 import uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult
 import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
 import uk.co.rx14.jmclaunchlib.auth.YggdrasilAuth
+import uk.co.rx14.jmclaunchlib.exceptions.ForbiddenOperationException
 import uk.co.rx14.jmclaunchlib.util.Task
 
 class LoginTask implements Task {
@@ -70,7 +71,16 @@ class LoginTask implements Task {
 					} catch (Exception ignored) {}
 
 				case { authResult == null }:
-					authResult = YggdrasilAuth.auth(username, passwordSupplier.getPassword(username))
+					String password = passwordSupplier.getPassword(username, false, null)
+					while (true) {
+						try {
+							authResult = YggdrasilAuth.auth(username, password)
+							break
+						} catch (ForbiddenOperationException ex) {
+							//Try again
+							password = passwordSupplier.getPassword(username, true, ex.message)
+						}
+					}
 			}
 
 			tokens.put(username, authResult)
