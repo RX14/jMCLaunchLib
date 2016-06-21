@@ -6,6 +6,7 @@ import groovy.transform.ToString
 import org.apache.commons.io.FileUtils
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult
 
 import java.nio.file.Path
 
@@ -25,6 +26,7 @@ class MinecraftCaches extends Cache {
 	MinecraftMaven libs
 	EtagCache versions
 	Path natives
+	AuthResultCache auth
 
 	static MinecraftCaches create(Path storage, boolean offline = false) {
 		def cache = new MinecraftCaches(
@@ -33,6 +35,7 @@ class MinecraftCaches extends Cache {
 			libs: new MinecraftMaven(storage.resolve("libs"), offline),
 			versions: new EtagCache(storage.resolve("versions"), offline),
 			natives: storage.resolve("natives"),
+			auth: new AuthResultCache(storage.resolve("auth.json").toFile()),
 			offline: offline
 		)
 

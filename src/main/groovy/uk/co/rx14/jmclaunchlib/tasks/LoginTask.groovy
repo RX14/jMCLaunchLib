@@ -8,6 +8,7 @@ import uk.co.rx14.jmclaunchlib.LaunchSpec
 import uk.co.rx14.jmclaunchlib.auth.MinecraftAuthResult
 import uk.co.rx14.jmclaunchlib.auth.PasswordSupplier
 import uk.co.rx14.jmclaunchlib.auth.YggdrasilAuth
+import uk.co.rx14.jmclaunchlib.caches.AuthResultCache
 import uk.co.rx14.jmclaunchlib.exceptions.ForbiddenOperationException
 import uk.co.rx14.jmclaunchlib.util.Task
 
@@ -22,14 +23,14 @@ class LoginTask implements Task {
 	String username
 	PasswordSupplier passwordSupplier
 	boolean offline
-	File cacheFile
+	AuthResultCache cache
 	LaunchSpec spec
 
-	LoginTask(String username, PasswordSupplier passwordSupplier, boolean offline, File cacheFile, LaunchSpec spec) {
+	LoginTask(String username, PasswordSupplier passwordSupplier, boolean offline, AuthResultCache cache, LaunchSpec spec) {
 		this.username = username
 		this.passwordSupplier = passwordSupplier
 		this.offline = offline
-		this.cacheFile = cacheFile
+		this.cache = cache
 		this.spec = spec
 		this.weight = offline ? 0 : 5
 	}
@@ -50,44 +51,7 @@ class LoginTask implements Task {
 				)
 			)
 		} else {
-			def tokens = [:]
-			if (cacheFile.exists()) {
-				try {
-					tokens = new JsonSlurperClassic().parse(cacheFile)
-				} catch (Exception e) {
-					LOGGER.warn "Failed to parse auth.json", e
-				}
-			}
-
-			def authResult = tokens.get(username)
-
-			switch (authResult) {
-				case { authResult != null }:
-					try {
-						authResult.selectedProfile = authResult.selectedProfile as MinecraftAuthResult.Profile //why :(
-						authResult = authResult as MinecraftAuthResult
-						authResult = YggdrasilAuth.refresh(authResult)
-						if (authResult.valid) break
-					} catch (Exception ignored) {}
-
-				case { authResult == null }:
-					String password = passwordSupplier.getPassword(username, false, null)
-					while (true) {
-						try {
-							authResult = YggdrasilAuth.auth(username, password)
-							break
-						} catch (ForbiddenOperationException ex) {
-							//Try again
-							password = passwordSupplier.getPassword(username, true, ex.message)
-						}
-					}
-			}
-
-			tokens.put(username, authResult)
-
-			cacheFile.text = JsonOutput.toJson(tokens)
-
-			spec.auth = authResult
+			spec.auth = cache.getValid(username, passwordSupplier)
 		}
 	}
 }

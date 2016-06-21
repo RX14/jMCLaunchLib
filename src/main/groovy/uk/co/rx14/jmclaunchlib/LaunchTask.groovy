@@ -43,7 +43,7 @@ class LaunchTask implements Task {
 
 		if (spec.netOffline) spec.offline = true
 
-		subtasks << new LoginTask(username, passwordSupplier, spec.offline, caches.storage.resolve("auth.json").toFile(), spec)
+		subtasks << new LoginTask(username, passwordSupplier, spec.offline, caches.auth, spec)
 		subtasks << new LibsTask(caches.libs, version, spec.nativesDirectory, spec)
 		subtasks << new MinecraftJarTask(caches.versions, version, spec)
 		subtasks << new AssetsTask(version, caches.assets, spec)
